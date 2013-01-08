@@ -1,0 +1,37 @@
+The simulator has been developed using python 3.2.  It should probably
+run with any python 3.x version, but will not run on python 2.x.  It
+might be possible to make it run on python 2.x, but it's not a
+priority at the moment.  The main issue is that the API to TkInter
+changed.
+
+If you have python 3.2 installed in your path as python3.2, you can run the
+simulator by running:
+./robot-sim
+
+Otherwise the incantation is something like
+python3.2 robot-sim
+or
+python model.py 
+if python 3.2 is your default version.
+
+TODO:  add a script to simplify startup.
+
+
+One the simulator is running, you can drive manually using the buttons
+at the top of the window.  
+
+The simulator will also listen for incoming connections on TCP port
+55443.  Robot software should connect to TCP port 55443 and issue
+commands as described in the robot manual.
+
+There's a test program in the test directory.  Compile it and run it -
+it connects to the simulator and drives the robot.
+
+There are a number of scenery files in the scenery directory.  Use the
+"Load" button to load the scenery file - you can do this while the
+robot is driving, but it's probably better to load the correct scenery
+file before starting the robot software.
+
+
+The native version of Tk installed on MacOS is very very slow.  Best to install activetcl:
+http://www.python.org/getit/mac/tcltk/#activetcl-8-5-11
