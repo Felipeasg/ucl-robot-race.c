@@ -11,6 +11,6 @@ int main () {
   initSocket();
   
   while (1) {
-    turnAtVoltage(100,50);
+    turnOnSpotAtVoltage(100);
   }
 }
