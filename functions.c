@@ -2,12 +2,24 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdbool.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
 char buf[80];
 struct sockaddr_in s_addr;
 int i, sock;
+
+bool inLimit(int voltage) {
+  if (voltage <= 127 && voltage >= -127)
+    return true;
+  
+  return false;
+}
+
+void stopIf (bool status) {
+  if (status) exit(1);
+}
 
 void initSocket() {
   if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
@@ -30,6 +42,7 @@ void nextCommand() {
 }
 
 void moveAtVoltage(int voltage1, int voltage2) {
+  stopIf(!inLimit(voltage1) || !inLimit(voltage2));
   sprintf(buf, "M LR %i %i\n", voltage1, voltage2);
   printf("M LR %i %i\n", voltage1, voltage2);
   nextCommand();
@@ -40,6 +53,7 @@ void moveStraightAtVoltage(int voltage) {
 }
 
 void turnAtVoltage(int voltage1, int voltage2) {
+  stopIf(!inLimit(voltage1) || !inLimit(voltage2));
   sprintf(buf, "M LR %i %i\n", voltage1, voltage2);
   printf("M LR %i %i\n", voltage1, voltage2);
   nextCommand();
