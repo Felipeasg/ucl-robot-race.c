@@ -1,3 +1,10 @@
+#ifndef FUNCTIONS_INCLUDED
+#define FUNCTIONS_INCLUDED
+
+struct sensors {
+  int encoders[2];
+};
+
 void initSocket();
 void nextCommand();
 
@@ -8,3 +15,5 @@ void turnAtVoltage(int voltage1, int voltage2);
 void turnOnSpotAtVoltage(int voltage);
 
 void stopMovement();
+
+#endif
