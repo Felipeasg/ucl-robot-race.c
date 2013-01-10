@@ -4,10 +4,15 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <string.h>
+#include <regex.h>
 #include "functions.h"
 
 int main () {
   initSocket();
   
-  turnOnSpotAtVoltage(90);
+  
+  while (1) {
+    moveStraightAtVoltage(90);
+  }
 }
