@@ -1,9 +1,10 @@
 #ifndef FUNCTIONS_INCLUDED
 #define FUNCTIONS_INCLUDED
 
-struct sensors {
-  int encoders[2];
-};
+typedef struct {
+  int encodersL;
+  int encodersR;
+} sensors;
 
 void initSocket();
 void nextCmd();
