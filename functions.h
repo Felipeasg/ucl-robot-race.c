@@ -4,8 +4,6 @@
 struct sensors {
   int encoders[2];
 };
-typedef void (*event_cb_t)(const struct event *evt, void *userdata);
-
 
 void initSocket();
 void nextCmd();
