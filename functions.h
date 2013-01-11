@@ -20,3 +20,7 @@ void turnOnSpotAtVoltage(int voltage);
 void stopMovement();
 
 #endif
+
+
+// 12/3
+// 9/4

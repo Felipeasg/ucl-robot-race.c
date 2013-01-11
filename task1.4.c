@@ -8,14 +8,12 @@
 #include <regex.h>
 #include "functions.h"
 
-int main () {
-  initSocket();
-  
+
+void coefficientSquare(int x) {
   sensors initial;
   sensors current;
   sensors toBe;
 
-void coefficientSquare (int x) {
   while(1) {
     toBe.encodersL = 199;
     toBe.encodersR = 199;
@@ -35,4 +33,9 @@ void coefficientSquare (int x) {
       encodersGet(&current);
     }
   }
+}
+
+int main () {
+  initSocket();
+  coefficientSquare(1);
 }
