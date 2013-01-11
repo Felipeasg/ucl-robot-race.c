@@ -6,7 +6,7 @@ struct sensors {
 };
 
 void initSocket();
-void nextCommand();
+void nextCmd();
 
 void moveAtVoltage(int voltage1, int voltage2);
 void moveStraightAtVoltage(int voltage);
