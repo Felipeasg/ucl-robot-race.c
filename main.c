@@ -11,8 +11,14 @@
 int main () {
   initSocket();
   
-  
-  while (1) {
+  sensors initial;
+  sensors current;
+  sensors toBe = {encodersL: 200, encodersR: 200};
+
+  encodersGet(&initial);
+  encodersGet(&current);
+  while (sensorsToBe(&current, &initial, &toBe, SMELR)) {
     moveStraightAtVoltage(90);
+    encodersGet(&current);
   }
 }

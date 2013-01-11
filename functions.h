@@ -1,6 +1,8 @@
 #ifndef FUNCTIONS_INCLUDED
 #define FUNCTIONS_INCLUDED
 
+#define SMELR 1
+
 typedef struct {
   int encodersL;
   int encodersR;
