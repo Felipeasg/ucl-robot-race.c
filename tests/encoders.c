@@ -14,10 +14,20 @@ int tests_run = 0;
 int tests_fail = 0;
 
 static char * encodersParse_test();
+static char * encodersToBe_test();
 
 static char * all_tests() {
     it("encodersParse", encodersParse_test);
+    it("encodersToBe", encodersToBe_test);
     return 0;
+}
+
+static char * encodersToBe_test() {
+  /* Scenario */
+    sensors current = {.encodersL = 200, .encodersR = 200};
+    sensors initial = {.encodersL = 200, .encodersR = 200};
+    sensors toBe = {.encodersL = 200, .encodersR = 200};
+    encodersToBe(current, initial, toBe)
 }
 
 static char * encodersParse_test() {
