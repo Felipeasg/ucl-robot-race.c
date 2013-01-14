@@ -3,6 +3,10 @@
 
 #define SMELR 1
 
+char buf[80];
+struct sockaddr_in s_addr;
+int sock;
+
 typedef struct {
   int encodersL;
   int encodersR;
