@@ -26,7 +26,7 @@ void encodersParse(char* elaborated[], sensors* Sensors) {
   Sensors->encodersR = atoi(elaborated[3]);
 }
 
-bool encordersToBe(sensors* Sensors, sensors* initial, sensors* toBe) {
+bool encodersToBe(sensors* Sensors, sensors* initial, sensors* toBe) {
   int l,r;
   if (abs(Sensors->encodersL - initial->encodersL) >= toBe->encodersL) {l=1;}
   else {l=0;}
