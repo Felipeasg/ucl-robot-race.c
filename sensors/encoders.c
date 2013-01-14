@@ -21,9 +21,13 @@ void encodersGet(sensors* Sensors) {
   parseCmd(buf, elaborated, SMELR, Sensors);
 }
 
-void encodersParse(char* elaborated[], sensors* Sensors) {
+int encodersParse(char* elaborated[], sensors* Sensors) {
+  if (elaborated[2] == NULL || elaborated[3] == NULL ||
+      !strcmp(elaborated[2],"") || !strcmp(elaborated[3],"") ) return 1;
   Sensors->encodersL = atoi(elaborated[2]);
-  Sensors->encodersR = atoi(elaborated[3]);
+  Sensors->encodersR = atoi(elaborated[3]); //TODO something better than atoi
+  // it should be 0 for failure, 1 for silent, 2 for OK
+  return 2;
 }
 
 bool encodersToBe(sensors* Sensors, sensors* initial, sensors* toBe) {

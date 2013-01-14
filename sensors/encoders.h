@@ -3,7 +3,7 @@
 
 void encordersCmd();
 void encodersGet(sensors* Sensors);
-void encodersParse(char**, sensors*);
+int encodersParse(char**, sensors*);
 bool encodersToBe(sensors*, sensors*, sensors*);
 
 #endif
