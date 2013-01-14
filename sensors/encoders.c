@@ -30,12 +30,16 @@ int encodersParse(char* elaborated[], sensors* Sensors) {
   return 2;
 }
 
-bool encodersToBe(sensors* Sensors, sensors* initial, sensors* toBe) {
+/* encodersToBe
+// return true when is not yet toBe, return false when it goes over toBe
+*/ 
+bool encodersToBe(sensors* current, sensors* initial, sensors* toBe) {
   int l,r;
-  if (abs(Sensors->encodersL - initial->encodersL) >= toBe->encodersL) {l=1;}
-  else {l=0;}
-  if (abs(Sensors->encodersR - initial->encodersR) >= toBe->encodersR) {r=1;}
-  else {r=0;}
+
+  if (sensorToBe(current->encodersL, initial->encodersL, toBe->encodersL)) {l=0;}
+  else {l=1;}
+  if (sensorToBe(current->encodersR, initial->encodersR, toBe->encodersR)) {r=0;}
+  else {r=1;}
 
   if (l == 1 && r == 1) {
     return false;

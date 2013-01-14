@@ -21,6 +21,7 @@ void moveStraightAtVoltage(int voltage);
 void turnAtVoltage(int voltage1, int voltage2);
 void turnOnSpotAtVoltage(int voltage);
 
+bool sensorToBe(int current, int initial, int toBe );
 void stopMovement();
 
 #endif

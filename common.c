@@ -9,7 +9,6 @@
 #include "common.h"
 #include "sensors/encoders.h"
 
-
 #define WHEELREVOLUTION 100 * 3.14159
 #define WHEELDISTANCE 240
 
@@ -56,6 +55,15 @@ void readResult(result) {
 
 void nextCmd() {
   write(sock, buf, strlen(buf)); memset(buf, 0, 80); read(sock, buf, 80);
+}
+
+bool sensorToBe(int current, int initial, int toBe ) {
+  int l,r;
+
+  if (abs(abs(current) - abs(initial)) >= abs(toBe)) // TODO
+    return false;
+
+  return true; 
 }
 
 void sensorsToBe(sensors* Sensors, sensors* initial, sensors* toBe, int sensorId) {
@@ -129,6 +137,5 @@ void moveStraightAtVoltage(int voltage) {
 }
 /* Level abstraction: 1 end */
 
-// TODO
 
-// check parser for W START
+// TODO

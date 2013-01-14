@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -24,10 +25,88 @@ static char * all_tests() {
 
 static char * encodersToBe_test() {
   /* Scenario */
-    sensors current = {.encodersL = 200, .encodersR = 200};
-    sensors initial = {.encodersL = 200, .encodersR = 200};
-    sensors toBe = {.encodersL = 200, .encodersR = 200};
-    encodersToBe(current, initial, toBe)
+    sensors current;
+    sensors initial;
+    sensors toBe;
+    bool status;
+    
+    describe("In normal case");
+    current = (sensors){.encodersL = 200, .encodersR = 200};
+    initial = (sensors){.encodersL = 0, .encodersR = 0};
+    toBe = (sensors){.encodersL = 200, .encodersR = 200};
+    status = encodersToBe(&current, &initial, &toBe);
+    should("be false when toBe is exactly as (current-initial) - LR", status==false);
+
+    current = (sensors){.encodersL = 100, .encodersR = 100};
+    initial = (sensors){.encodersL = 0, .encodersR = 0};
+    toBe = (sensors){.encodersL = 200, .encodersR = 200};
+    status = encodersToBe(&current, &initial, &toBe);
+    should("be true when toBe is less than toBe - LR", status==true);
+
+    current = (sensors){.encodersL = 201, .encodersR = 201};
+    initial = (sensors){.encodersL = 0, .encodersR = 0};
+    toBe = (sensors){.encodersL = 200, .encodersR = 200};
+    status = encodersToBe(&current, &initial, &toBe);
+    should("be false when toBe is more than toBe - LR", status==false);
+    
+    current = (sensors){.encodersL = 250, .encodersR = 150};
+    initial = (sensors){.encodersL = 0, .encodersR = 0};
+    toBe = (sensors){.encodersL = 200, .encodersR = 200};
+    status = encodersToBe(&current, &initial, &toBe);
+    should("be true when L is more and R is les than toBe", status==true);
+
+    current = (sensors){.encodersL = 150, .encodersR = 250};
+    initial = (sensors){.encodersL = 0, .encodersR = 0};
+    toBe = (sensors){.encodersL = 200, .encodersR = 200};
+    status = encodersToBe(&current, &initial, &toBe);
+    should("be true when R is more and L is les than toBe", status==true);
+    
+    current = (sensors){.encodersL = 200, .encodersR = 100};
+    initial = (sensors){.encodersL = 0, .encodersR = 0};
+    toBe = (sensors){.encodersL = 200, .encodersR = 100};
+    status = encodersToBe(&current, &initial, &toBe);
+    should("be false when toBe is set diffently for each encoder", status==false);
+
+    current = (sensors){.encodersL = 0, .encodersR = 0};
+    initial = (sensors){.encodersL = 0, .encodersR = 0};
+    toBe = (sensors){.encodersL = 0, .encodersR = 0};
+    status = encodersToBe(&current, &initial, &toBe);
+    should("return false if toBe is set as 0", status==false);
+
+    describe("In case wheels go in opposite direction");
+    
+    current = (sensors){.encodersL = -200, .encodersR = 200};
+    initial = (sensors){.encodersL = 0, .encodersR = 0};
+    toBe = (sensors){.encodersL = 200, .encodersR = 200};
+    status = encodersToBe(&current, &initial, &toBe);
+    should("be OK when wheels go in different direction -L +R", status==false);
+
+    current = (sensors){.encodersL = 200, .encodersR = -200};
+    initial = (sensors){.encodersL = 0, .encodersR = 0};
+    toBe = (sensors){.encodersL = 200, .encodersR = 200};
+    status = encodersToBe(&current, &initial, &toBe);
+    should("be OK when wheels go in different direction +L -R", status==false);
+    
+    current = (sensors){.encodersL = -200, .encodersR = -200};
+    initial = (sensors){.encodersL = 0, .encodersR = 0};
+    toBe = (sensors){.encodersL = 200, .encodersR = 200};
+    status = encodersToBe(&current, &initial, &toBe);
+    should("be OK when wheels go in different direction -L -R", status==false);
+
+    describe("In case toBe is negative");
+    current = (sensors){.encodersL = 200, .encodersR = 200};
+    initial = (sensors){.encodersL = 0, .encodersR = 0};
+    toBe = (sensors){.encodersL = -200, .encodersR = -200};
+    status = encodersToBe(&current, &initial, &toBe);
+    should("be OK when toBe is negative and current is positive", status==false);
+
+    current = (sensors){.encodersL = -100, .encodersR = -100};
+    initial = (sensors){.encodersL = 0, .encodersR = 0};
+    toBe = (sensors){.encodersL = -200, .encodersR = -200};
+    status = encodersToBe(&current, &initial, &toBe);
+    should("be OK when toBe is negative and current is negative", status==true);
+
+    return 0;
 }
 
 static char * encodersParse_test() {
