@@ -4,8 +4,6 @@
 #define SMELR 1
 
 char buf[80];
-struct sockaddr_in s_addr;
-int sock;
 
 typedef struct {
   int encodersL;
@@ -18,7 +16,7 @@ void constAcceleration (int, int, int, int, sensors*, sensors*);
 
 int getProportion(int, int);
 
-void initSocket();
+int initSocket();
 void nextCmd();
 
 void moveAtVoltage(int, int);

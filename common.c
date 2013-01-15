@@ -12,6 +12,8 @@
 #define WHEELREVOLUTION 100 * 3.14159
 #define WHEELDISTANCE 240
 
+int sock = -1;
+
 int abs (int value) {
   if (value < 0) return -value;
   return value;
@@ -40,22 +42,33 @@ void constAcceleration (int initialL, int initialR, int finalL, int finalR, sens
   }
 }
 
-void initSocket() {
+int initSocket() {
+  struct sockaddr_in s_addr;
+  if (sock != -1) {
+    close(sock);
+    sock = -1;
+  }
+
   if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
     fprintf(stderr, "Failed to create socket1\n");
     exit(1);
   }
   
-  s_addr.sin_family = AF_INET;
-  s_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-  s_addr.sin_port = htons(55443);
-  
-  if (connect(sock, (struct sockaddr *) &s_addr, sizeof(s_addr)) < 0) {
-    fprintf(stderr, "Failed to create socket2\n");
-    exit(1);
-  }
+  while (1) {
+    s_addr.sin_family = AF_INET;
+    s_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    s_addr.sin_port = htons(55443);
 
-  sleep(2); //TODO test it
+    if (connect(sock, (struct sockaddr *) &s_addr, sizeof(s_addr)) >= 0) {
+      /* connection succeeded */
+      printf("Connection succeeded\n");
+      return sock;
+      return;
+    }
+    sleep(1);
+    printf(".");
+    fflush(stdout);
+  }
 }
 
 bool inLimit(int voltage) {
@@ -71,8 +84,54 @@ void stopIf (bool status) {
 
 /* Level abstraction: 0 start */
 
+int writeCmd(char *msg, int len) {
+  if (write(sock, msg, len) <= 0) {
+    /* the write failed - likely the robot was switched off - attempt
+       to reconnect and reinitialize */
+    initSocket();
+    return 0;
+  } else {
+    return 1;
+  }
+}
+
+int readCmd(char* buf, int bufsize) {
+  int val;
+  fd_set read_fdset;
+  fd_set except_fdset;
+  struct timeval tv;
+  tv.tv_sec = 2;
+  tv.tv_usec = 0;
+  FD_ZERO(&read_fdset);
+  FD_ZERO(&except_fdset);
+  FD_SET(sock, &read_fdset);
+  FD_SET(sock, &except_fdset);
+  if (select(sock+1, &read_fdset, NULL, &except_fdset, &tv) == 0) {
+    /* we've waited 2 seconds and got no response - too long - conclude
+       the socket is dead */
+    printf("timed out waiting response\n");
+    initSocket();
+    return 0;
+  }
+  if (FD_ISSET(sock, &except_fdset)) {
+    initSocket();
+    return 0;
+  }
+  
+  //assert(FD_ISSET(sock, &read_fdset));
+  val = read(sock, buf, bufsize);
+  if (val > 0) {
+  } else {
+    /* the write failed - likely the robot was switched off - attempt
+       to reconnect and reinitialize */
+    initSocket();
+  }
+  return val;
+}
+
+
 void nextCmd() {
-  write(sock, buf, strlen(buf)); memset(buf, 0, 80); read(sock, buf, 80);
+  writeCmd(buf, strlen(buf)); memset(buf, 0, 80); read(sock, buf, 80);
 }
 
 bool sensorToBe(int current, int initial, int toBe ) {
