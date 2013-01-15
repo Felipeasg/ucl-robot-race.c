@@ -34,7 +34,6 @@ static char * encodersGet_test() {
     describe("In normal case");
     encodersGet(&Sensors);
     should("populate encodersL encodersR", Sensors.encodersR > 0 && Sensors.encodersL > 0);
-
 }
 
 static char * encodersCmd_test() {
