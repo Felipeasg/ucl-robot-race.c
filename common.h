@@ -19,7 +19,7 @@ int getProportion(int, int);
 int initSocket();
 void nextCmd();
 
-void infraOut(int, int);
+void infraOutFront(int, int);
 void moveAtVoltage(int, int);
 void moveStraightAtVoltage(int);
 
