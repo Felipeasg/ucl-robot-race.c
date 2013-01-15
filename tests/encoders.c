@@ -181,7 +181,6 @@ static char * encodersParse_test() {
     status = encodersParse(elaborated2, &Sensors3);
     should("complain silently if null is given", status==1);
 
-
     return 0;
 }
 

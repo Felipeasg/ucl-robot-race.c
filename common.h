@@ -27,6 +27,7 @@ void moveStraightAtVoltage(int);
 void turnOnSpotAtVoltage(int);
 
 bool sensorToBe(int, int, int);
+bool sensorsToBe(sensors*, sensors*, sensors*);
 void stopMovement();
 
 #endif

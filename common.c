@@ -27,13 +27,13 @@ void constAcceleration (int initialL, int initialR, int finalL, int finalR, sens
 
   encodersGet(&current);
   encodersGet(&initial);
-  while(encodersToBe(&current, &initial, toBeInitial)) { //TODO sensorsToBe instead
+  while(sensorsToBe(&current, &initial, toBeInitial)) { //TODO sensorsToBe instead
     moveAtVoltage(initialL, initialR);
     encodersGet(&current);
   }
 
   encodersGet(&initial);
-  while(encodersToBe(&current, &initial, toBeFinal)) {
+  while(sensorsToBe(&current, &initial, toBeFinal)) {
     moveAtVoltage(finalL, finalR);
     encodersGet(&current);
   }
@@ -83,11 +83,15 @@ bool sensorToBe(int current, int initial, int toBe ) {
   return true; 
 }
 
-void sensorsToBe(sensors* Sensors, sensors* initial, sensors* toBe, int sensorId) {
+bool sensorsToBe(sensors* Sensors, sensors* initial, sensors* toBe) {
   // TODO SENSOR CHECKING
-  if (sensorId == SMELR) {
-    encodersToBe(Sensors, initial, toBe);
+  bool encoders;
+  if (toBe->encodersL != 0 || toBe->encodersR != 0) {
+    encoders = encodersToBe(Sensors, initial, toBe);
   }
+  
+  if (!encoders) return false;
+  else return true;
 }
 
 void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) {
@@ -123,10 +127,6 @@ void moveAtVoltage(int voltage1, int voltage2) {
   #ifdef DEBUG
   printf("M LR %i %i\n", voltage1, voltage2);
   #endif
-  nextCmd();
-}
-
-void turnAtVoltage(int voltage1, int voltage2) {
   nextCmd();
 }
 
