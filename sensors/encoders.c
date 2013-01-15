@@ -9,15 +9,17 @@
 #include "../common.h"
 
 
-void encordersCmd() {
+void encodersCmd() {
   sprintf(buf, "S MELR\n");
+  #ifdef DEBUG
   printf("S MELR\n");
+  #endif
   nextCmd();
 }
 
 void encodersGet(sensors* Sensors) {
   char* elaborated[80];
-  encordersCmd();
+  encodersCmd();
   parseCmd(buf, elaborated, SMELR, Sensors);
 }
 
@@ -30,9 +32,18 @@ int encodersParse(char* elaborated[], sensors* Sensors) {
   return 2;
 }
 
+void encodersReset() {
+  sprintf(buf, "C RME\n");
+  #ifdef DEBUG
+  printf("C RME\n");
+  #endif
+  nextCmd();
+}
+
 /* encodersToBe
 // return true when is not yet toBe, return false when it goes over toBe
-*/ 
+*/
+
 bool encodersToBe(sensors* current, sensors* initial, sensors* toBe) {
   int l,r;
 

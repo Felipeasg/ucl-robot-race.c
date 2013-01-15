@@ -6,8 +6,9 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <regex.h>
-#include "common.h"
 
+#define DEBUG 1
+#include "common.h"
 
 int main () {
   initSocket();

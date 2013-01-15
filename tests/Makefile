@@ -1,4 +1,4 @@
-hellomake: encoders.c ../sensors/*.c ../common.c
-	@gcc -g -o test encoders.c ../sensors/*.c ../common.c -I.
+encoders: encoders.c ../sensors/*.c ../common.c
+	@gcc -g -o encoders encoders.c ../sensors/*.c ../common.c -I.
 
-.PHONY: hellomake
+.PHONY: encoders

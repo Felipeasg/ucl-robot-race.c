@@ -16,12 +16,46 @@ int tests_fail = 0;
 
 static char * encodersParse_test();
 static char * encodersToBe_test();
+static char * encodersCmd_test();
+static char * encodersGet_test();
 
 static char * all_tests() {
     it("encodersParse", encodersParse_test);
     it("encodersToBe", encodersToBe_test);
+    it("encodersCmd", encodersCmd_test);
+    it("encodersGet", encodersGet_test);
     return 0;
 }
+
+static char * encodersGet_test() {
+  /* Scenario */
+    sensors Sensors;
+
+    describe("In normal case");
+    encodersGet(&Sensors);
+    should("populate encodersL encodersR", Sensors.encodersR > 0 && Sensors.encodersL > 0);
+
+}
+
+static char * encodersCmd_test() {
+  /* Scenario */
+    char s[3];
+    char melr[5];
+    int value1, value2;
+    initSocket();
+
+    describe("In normal case");
+    encodersReset();
+    encodersCmd();
+    sscanf (buf,"%s %s %d %d",s, melr, &value1, &value2);
+    should("have a buffer with format \"S MELR 0 0 at connection\"", !strcmp(s,"S") && !strcmp(melr, "MELR") && !value1 && !value2);
+    
+    moveAtVoltage(10,10);
+    encodersCmd();
+    sscanf (buf,"%s %s %d %d",s, melr, &value1, &value2);
+    should("have a buffer with format \"S MELR >0 >0 after movement\"", !strcmp(s,"S") && !strcmp(melr, "MELR") && value1 >= 0 && value2 >= 0);
+}
+
 
 static char * encodersToBe_test() {
   /* Scenario */

@@ -83,11 +83,13 @@ void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) 
     elaborated[i] = strtok (NULL, " ");
   }
   
+  #ifdef DEBUG
   printf("PARSE %s %s\n", elaborated[0], elaborated[1]);
   printf("PARSE %s %s\n", elaborated[2], elaborated[3]);
 //  if (!funcNumber) return; // if 0 no function if 9 this function...
   printf("%s, %p\n",elaborated[0],  elaborated[0] );
   printf("%s, %p\n",elaborated[1],  elaborated[1] );
+  #endif
   
   if (!strcmp(elaborated[0], "W")) {
     memset(elaborated, 0, 80);
@@ -104,20 +106,26 @@ void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) 
 void moveAtVoltage(int voltage1, int voltage2) {
   stopIf(!inLimit(voltage1) || !inLimit(voltage2));
   sprintf(buf, "M LR %i %i\n", voltage1, voltage2);
+  #ifdef DEBUG
   printf("M LR %i %i\n", voltage1, voltage2);
+  #endif
   nextCmd();
 }
 
 void turnAtVoltage(int voltage1, int voltage2) {
   stopIf(!inLimit(voltage1) || !inLimit(voltage2));
   sprintf(buf, "M LR %i %i\n", voltage1, voltage2);
+  #ifdef DEBUG
   printf("M LR %i %i\n", voltage1, voltage2);
+  #endif
   nextCmd();
 }
 
 void stopMovement() {
   sprintf(buf, "M LR 0 0\n");
+  #ifdef DEBUG
   printf("M LR 0 0\n");
+  #endif
   nextCmd();
 }
 void stopMovementWhen(bool condition) {
