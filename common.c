@@ -71,7 +71,7 @@ int initSocket() {
   }
 }
 
-int infraOut(int infraFrontL, int infraFrontR){
+void infraOut(int infraFrontL, int infraFrontR){
   stopIf(!inAngle(infraFrontL && !inAngle(infraFrontR));
 	sprintf(buf, "I LR %i %i\n);
 	#ifdef DEBUG
