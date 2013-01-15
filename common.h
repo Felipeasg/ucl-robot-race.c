@@ -15,13 +15,13 @@ typedef struct {
 void initSocket();
 void nextCmd();
 
-void moveAtVoltage(int voltage1, int voltage2);
-void moveStraightAtVoltage(int voltage);
+void moveAtVoltage(int, int);
+void moveStraightAtVoltage(int);
 
-void turnAtVoltage(int voltage1, int voltage2);
-void turnOnSpotAtVoltage(int voltage);
+void turnAtVoltage(int, int);
+void turnOnSpotAtVoltage(int);
 
-bool sensorToBe(int current, int initial, int toBe );
+bool sensorToBe(int, int, int);
 void stopMovement();
 
 #endif

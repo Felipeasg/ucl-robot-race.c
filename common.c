@@ -72,8 +72,6 @@ void sensorsToBe(sensors* Sensors, sensors* initial, sensors* toBe, int sensorId
   }
 }
 
-
-
 void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) {
   int i = 0;
   elaborated[i] = strtok (buf," ");
@@ -87,8 +85,6 @@ void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) 
   printf("PARSE %s %s\n", elaborated[0], elaborated[1]);
   printf("PARSE %s %s\n", elaborated[2], elaborated[3]);
 //  if (!funcNumber) return; // if 0 no function if 9 this function...
-  printf("%s, %p\n",elaborated[0],  elaborated[0] );
-  printf("%s, %p\n",elaborated[1],  elaborated[1] );
   #endif
   
   if (!strcmp(elaborated[0], "W")) {
