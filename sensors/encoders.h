@@ -4,6 +4,7 @@
 void encodersCmd();
 void encodersGet(sensors* Sensors);
 int encodersParse(char**, sensors*);
+void encodersSet(sensors*, int, int);
 bool encodersToBe(sensors*, sensors*, sensors*);
 
 #endif

@@ -22,17 +22,18 @@ int getProportion(int number, int proportion) {
 }
 
 void constAcceleration (int initialL, int initialR, int finalL, int finalR, sensors* toBeInitial, sensors* toBeFinal) { //TODO pass left and right
-  sensors current;
+  sensors current; // should be global
   sensors initial;
 
-  encodersGet(&current);
-  encodersGet(&initial);
+  encodersGet(&current); //TODO they must be equal!
+  encodersSet(&initial, current.encodersL, current.encodersR);
   while(sensorsToBe(&current, &initial, toBeInitial)) { //TODO sensorsToBe instead
     moveAtVoltage(initialL, initialR);
     encodersGet(&current);
   }
 
-  encodersGet(&initial);
+  encodersGet(&current); //TODO they must be equal!
+  encodersSet(&initial, current.encodersL, current.encodersR);
   while(sensorsToBe(&current, &initial, toBeFinal)) {
     moveAtVoltage(finalL, finalR);
     encodersGet(&current);
@@ -54,7 +55,7 @@ void initSocket() {
     exit(1);
   }
 
-  sleep(2);
+  sleep(2); //TODO test it
 }
 
 bool inLimit(int voltage) {
