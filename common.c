@@ -17,6 +17,23 @@ int abs (int value) {
   return value;
 }
 
+int getProportion(int number, int proportion) {
+  return (proportion/100)*number;
+}
+
+void constAcceleration (int initialL, int initialR, int finalL, int finalR, sensors* toBe) { //TODO pass left and right
+  sensors current;
+  sensors initial;
+
+  encodersGet(&current);
+  encodersGet(&initial);
+  while(encodersToBe(&current, &initial, toBe)) {
+    moveAtVoltage(initialL, initialR);
+    encodersGet(&current);
+  }
+  moveAtVoltage(finalL, finalR);
+}
+
 void initSocket() {
   if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
     fprintf(stderr, "Failed to create socket1\n");
@@ -45,11 +62,6 @@ bool inLimit(int voltage) {
 void stopIf (bool status) {
   if (status) exit(1);
 }
-
-/* Parsing functions start */
-void readResult(result) {
-}
-/* Parsing functions end*/
 
 /* Level abstraction: 0 start */
 

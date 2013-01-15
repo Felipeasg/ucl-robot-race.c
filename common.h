@@ -12,6 +12,12 @@ typedef struct {
   int encodersR;
 } sensors;
 
+
+int abs (int);
+void constAcceleration(int, int, int, int, sensors*);
+
+int getProportion(int, int);
+
 void initSocket();
 void nextCmd();
 
