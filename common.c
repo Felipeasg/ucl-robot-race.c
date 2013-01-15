@@ -21,17 +21,22 @@ int getProportion(int number, int proportion) {
   return (proportion/100)*number;
 }
 
-void constAcceleration (int initialL, int initialR, int finalL, int finalR, sensors* toBe) { //TODO pass left and right
+void constAcceleration (int initialL, int initialR, int finalL, int finalR, sensors* toBeInitial, sensors* toBeFinal) { //TODO pass left and right
   sensors current;
   sensors initial;
 
   encodersGet(&current);
   encodersGet(&initial);
-  while(encodersToBe(&current, &initial, toBe)) {
+  while(encodersToBe(&current, &initial, toBeInitial)) { //TODO sensorsToBe instead
     moveAtVoltage(initialL, initialR);
     encodersGet(&current);
   }
-  moveAtVoltage(finalL, finalR);
+
+  encodersGet(&initial);
+  while(encodersToBe(&current, &initial, toBeFinal)) {
+    moveAtVoltage(finalL, finalR);
+    encodersGet(&current);
+  }
 }
 
 void initSocket() {
@@ -79,6 +84,7 @@ bool sensorToBe(int current, int initial, int toBe ) {
 }
 
 void sensorsToBe(sensors* Sensors, sensors* initial, sensors* toBe, int sensorId) {
+  // TODO SENSOR CHECKING
   if (sensorId == SMELR) {
     encodersToBe(Sensors, initial, toBe);
   }
@@ -121,11 +127,6 @@ void moveAtVoltage(int voltage1, int voltage2) {
 }
 
 void turnAtVoltage(int voltage1, int voltage2) {
-  stopIf(!inLimit(voltage1) || !inLimit(voltage2));
-  sprintf(buf, "M LR %i %i\n", voltage1, voltage2);
-  #ifdef DEBUG
-  printf("M LR %i %i\n", voltage1, voltage2);
-  #endif
   nextCmd();
 }
 
@@ -144,7 +145,7 @@ void stopMovementWhen(bool condition) {
 
 /* Level abstraction: 1 start */
 void turnOnSpotAtVoltage(int voltage) {
-  turnAtVoltage(voltage, -voltage);
+  moveAtVoltage(voltage, -voltage);
   nextCmd();
 }
 
@@ -155,3 +156,4 @@ void moveStraightAtVoltage(int voltage) {
 
 
 // TODO
+// turn very slowly

@@ -14,7 +14,7 @@ typedef struct {
 
 
 int abs (int);
-void constAcceleration(int, int, int, int, sensors*);
+void constAcceleration (int, int, int, int, sensors*, sensors*);
 
 int getProportion(int, int);
 
@@ -24,7 +24,6 @@ void nextCmd();
 void moveAtVoltage(int, int);
 void moveStraightAtVoltage(int);
 
-void turnAtVoltage(int, int);
 void turnOnSpotAtVoltage(int);
 
 bool sensorToBe(int, int, int);

@@ -11,13 +11,15 @@
 #define DEBUG 1
 #include "common.h"
 
+// global vars holdin velocity
+
 int main () {
   initSocket();
 
-  sensors toBeTravelled = {.encodersL = 500, .encodersR = 200 };
+  sensors toBeTravelled1 = {.encodersL = 200, .encodersR = 200 };
+  sensors toBeTravelled2 = {.encodersL = 200, .encodersR = 200 };
+  constAcceleration(60, -60, -60, 60, &toBeTravelled1, &toBeTravelled2);
 
-  constAcceleration(127, 97, 60, 10, &toBeTravelled);
 
-  stopMovement();
   return 0;
 }
