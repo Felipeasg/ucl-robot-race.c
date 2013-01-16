@@ -23,6 +23,27 @@ int getProportion(int number, int proportion) {
   return (proportion/100)*number;
 }
 
+float getSlide(int m, int n) {
+  m = m/10;
+  printf("%i\n",m);
+  n = n/10;
+  printf("%i\n",n);
+  float series1, series2;
+  series1 = ((float)m/2)*(10+(float)m*10)/20;
+  printf("%f\n",series1);
+  series2 = ((float)n/2)*(10+(float)n*10)/20;
+  printf("%f\n",series2);
+  return abs(series2-series1);
+}
+
+
+void considerSlide(int fromVL, int fromVR, int toVL, int toVR, sensors* Sensors) {
+  int slideVL = getSlide(fromVL, toVL);
+  int slideVR = getSlide(fromVR, toVR);
+  Sensors->encodersL -= slideVL;
+  Sensors->encodersR -= slideVR;
+}
+
 void changeVelocity (int fromVL, int fromVR, int toVL, int toVR, sensors* toBeInitial, sensors* toBeFinal) { //TODO pass left and right
   sensors current; // should be global
   sensors initial;
@@ -35,15 +56,17 @@ void changeVelocity (int fromVL, int fromVR, int toVL, int toVR, sensors* toBeIn
     moveAtVoltage(fromVL, fromVR);
     encodersGet(&current);
   }
-  
+
   encodersGet(&current); //TODO they must be equal!
-  printf("changeVelocity initial from %d:%d and encoders: %d:%d\n", toVL, toVR, current.encodersL, current.encodersR);
+  printf("changeVelocity middle from %d:%d and encoders: %d:%d\n", toVL, toVR, current.encodersL, current.encodersR);
   fflush(stdout);
   encodersSet(&initial, current.encodersL, current.encodersR);
   while(sensorsToBe(&current, &initial, toBeFinal)) {
     moveAtVoltage(toVL, toVR);
     encodersGet(&current);
+    if (toVL == 0 && toVR == 0) {break;}
   }
+    printf("changeVelocity final from %d:%d and encoders: %d:%d\n", toVL, toVR, current.encodersL, current.encodersR);
 }
 
 void sensorsGetOneStep(sensors* Sensors, sensors* New, int steps) {
@@ -54,29 +77,32 @@ void sensorsGetOneStep(sensors* Sensors, sensors* New, int steps) {
 
 void constAcceleration (int initialVL, int initialVR, int finalVL, int finalVR, sensors* toBe, int steps) {
 
+  // TODO
   // iVL and fVL must be of the same sign
   
   // stop (or better, go normal) if initial and final are equal
+  
+  int newVL;
+  int newVR;
+  sensors current, initial, toBeStep;
+  sensorsGetOneStep(toBe, &toBeStep, steps);
+  encodersSet(&toBeStep, toBeStep.encodersL/2, toBeStep.encodersR/2);
 
   int stepVL = abs(initialVL-finalVL)/steps;
   int stepVR = abs(initialVR-finalVR)/steps;
   bool positiveL = (initialVL < finalVL);
   bool positiveR = (initialVR < finalVR);
-  int newVL;
-  int newVR;
-  sensors current;
-  sensors initial;
-  sensors toBeStep;
-  sensorsGetOneStep(toBe, &toBeStep, steps);
+
+  printf("Steps (%d) %d:%d(%d:%d) at voltage %d:%d(%d:%d)  \n", steps, toBeStep.encodersL, toBeStep.encodersR, toBe->encodersL, toBe->encodersR, stepVL, stepVR, (initialVL-finalVL), (initialVR-finalVR));
 
   encodersGet(&current);
   encodersSet(&initial, current.encodersL, current.encodersR);
-  while(1) {
-    newVL = initialVL;
-    newVR = initialVR;
+  newVL = initialVL;
+  newVR = initialVR;
 
-    changeVelocity((newVL-stepVL), (newVR-stepVR), newVL, newVR, &toBeStep, &toBeStep);
-    
+  while(1) {
+    printf("%d-%d, %d-%d\n", finalVL, finalVR, newVL, newVR);
+
     /* Calculating new speed */
     if (positiveL) {
       if (newVL+stepVL <= finalVL) initialVL += stepVL;
@@ -85,9 +111,31 @@ void constAcceleration (int initialVL, int initialVR, int finalVL, int finalVR, 
       if (newVL-stepVL >= finalVL) initialVL -= stepVL;
       if (newVR-stepVL >= finalVR) initialVR -= stepVR;
     }
+    
+    // TODO implement NEXT so that consider slide is more accurate
+
+    printf("%d-%d, %d-%d\n", finalVL, finalVR, newVL, newVR);
+
+    if (newVL == 0 && newVR == 0) {
+      if (positiveR || positiveL) { /*it should continue*/}
+      else if (positiveR == false && positiveL == false) break;
+    } else{
+      considerSlide(newVL, newVR, initialVL, initialVR, &toBeStep);
+      changeVelocity(newVL, newVR, initialVL, initialVR, &toBeStep, &toBeStep);
+    }
+
+    newVL = initialVL;
+    newVR = initialVR;
 
     encodersGet(&current);
-    if (!sensorsToBe(&current, &initial, toBe)) return;
+    printf("Encoders now at: %d:%d\n", current.encodersL, current.encodersR);
+    if (!sensorsToBe(&current, &initial, toBe)) break;
+  }
+  encodersGet(&current);
+  if (!sensorsToBe(&current, &initial, toBe)) {
+    // continue move
+  } else {
+
   }
 }
 
@@ -267,3 +315,4 @@ void moveStraightAtVoltage(int voltage) {
 
 // TODO
 // turn very slowly
+// move as fast as he can.

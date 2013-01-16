@@ -396,8 +396,10 @@ class RobotModel(BaseObj):
         for side in L,R:
             if (self.wheel_speed[side] < self.target_speed[side]):
                 self.wheel_speed[side] += self.wheel_accel[side]
+                # print ">", self.wheel_speed[side], self.encoder[side]*220.0*1.14/80.0, time.time()
             elif (self.wheel_speed[side] > self.target_speed[side]):
                 self.wheel_speed[side] -= self.wheel_accel[side]
+                # print "<", self.wheel_speed[side], self.encoder[side]*220.0*1.14/80.0, time.time()
 
     def update_servos(self):
         #really simple model for now
@@ -434,6 +436,8 @@ class RobotModel(BaseObj):
         #dist moved by left wheel
         dl = self.wheel_speed[L] / speed_gain
         self.encoder[L] += dl
+        
+        print "+", self.wheel_speed[L], self.encoder[L], self.encoder[L]*220.0*1.14/80.0, time.time()
 
         #dist moved by right wheel
         dr = self.wheel_speed[R] / speed_gain
@@ -459,6 +463,7 @@ class RobotModel(BaseObj):
         self.vis.set_posn(self.x, self.y, self.angle);
 
     def get_encoder(self, side):
+        # print "get encoder", self.encoder[side], self.encoder[side]*220.0*1.14/80.0, time.time()
         return self.encoder[side]*220.0*1.14/80.0
 
     def reset_motor_encoders(self):

@@ -1,38 +1,28 @@
-/* file minunit_example.c */
-
 #include <stdio.h>
-#include "minunit.h"
+#include <math.h>
 
-int tests_run = 0;
-
-int foo = 7;
-int bar = 4;
-
-static char * test_foo() {
-    mu_assert("error, foo != 7", foo == 7);
-    return 0;
+int abs (int value) {
+  if (value < 0) return -value;
+  return value;
 }
 
-static char * test_bar() {
-    mu_assert("error, bar != 5", bar == 5);
-    return 0;
+float calculateSlide(int m, int n) {
+  m = m/10;
+  printf("%i\n",m);
+  n = n/10;
+  printf("%i\n",n);
+  float series1, series2;
+  series1 = ((float)m/2)*(10+(float)m*10)/20;
+  printf("%f\n",series1);
+  series2 = ((float)n/2)*(10+(float)n*10)/20;
+  printf("%f\n",series2);
+  return abs(series2-series1);
 }
 
-static char * all_tests() {
-    mu_run_test(test_foo);
-    mu_run_test(test_bar);
-    return 0;
-}
+int main () {
+  int due = 12;
 
-int main(int argc, char **argv) {
-    char *result = all_tests();
-    if (result != 0) {
-        printf("%s\n", result);
-    }
-    else {
-        printf("ALL TESTS PASSED\n");
-    }
-    printf("Tests run: %d\n", tests_run);
+  printf("%f\n",calculateSlide(50,100));
 
-    return result != 0;
+  return 0;
 }

@@ -16,12 +16,17 @@
 int main () {
   initSocket();
 
-  sensors toBeTravelled1 = {.encodersL = 200, .encodersR = 200 };
-  sensors toBeTravelled2 = {.encodersL = 200, .encodersR = 200 };
+  sensors toBeTravelled1 = {.encodersL = 300, .encodersR = 300 };
+  sensors toBeTravelled2 = {.encodersL = 1000, .encodersR = 1000 };
   encodersReset();
-  changeVelocity(100, 100, 10, 10, &toBeTravelled1, &toBeTravelled2);
-  changeVelocity(100, 100, 10, 10, &toBeTravelled1, &toBeTravelled2);
+  // 
+  // considerSlide(0, 0, 100, 100, &toBeTravelled1);
+  // considerSlide(100, 100, 50, 50, &toBeTravelled2);
+  // changeVelocity(100, 100, 50, 50, &toBeTravelled1, &toBeTravelled2);
+  // stopMovement();
 
+  considerSlide(0, 0, 10, 10, &toBeTravelled1);
+  constAcceleration (10, 10, 100, 100, &toBeTravelled1, 10);
 
   return 0;
 }
