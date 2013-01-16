@@ -18,7 +18,9 @@ int main () {
 
   sensors toBeTravelled1 = {.encodersL = 200, .encodersR = 200 };
   sensors toBeTravelled2 = {.encodersL = 200, .encodersR = 200 };
-  constAcceleration(60, -60, -60, 60, &toBeTravelled1, &toBeTravelled2);
+  encodersReset();
+  changeVelocity(100, 100, 10, 10, &toBeTravelled1, &toBeTravelled2);
+  changeVelocity(100, 100, 10, 10, &toBeTravelled1, &toBeTravelled2);
 
 
   return 0;

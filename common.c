@@ -23,22 +23,71 @@ int getProportion(int number, int proportion) {
   return (proportion/100)*number;
 }
 
-void constAcceleration (int initialL, int initialR, int finalL, int finalR, sensors* toBeInitial, sensors* toBeFinal) { //TODO pass left and right
+void changeVelocity (int fromVL, int fromVR, int toVL, int toVR, sensors* toBeInitial, sensors* toBeFinal) { //TODO pass left and right
   sensors current; // should be global
   sensors initial;
 
   encodersGet(&current); //TODO they must be equal!
+  printf("changeVelocity initial from %d:%d and encoders: %d:%d\n", fromVL, fromVR, current.encodersL, current.encodersR);
+  fflush(stdout);
   encodersSet(&initial, current.encodersL, current.encodersR);
-  while(sensorsToBe(&current, &initial, toBeInitial)) { //TODO sensorsToBe instead
-    moveAtVoltage(initialL, initialR);
+  while(sensorsToBe(&current, &initial, toBeInitial)) {
+    moveAtVoltage(fromVL, fromVR);
     encodersGet(&current);
   }
-
+  
   encodersGet(&current); //TODO they must be equal!
+  printf("changeVelocity initial from %d:%d and encoders: %d:%d\n", toVL, toVR, current.encodersL, current.encodersR);
+  fflush(stdout);
   encodersSet(&initial, current.encodersL, current.encodersR);
   while(sensorsToBe(&current, &initial, toBeFinal)) {
-    moveAtVoltage(finalL, finalR);
+    moveAtVoltage(toVL, toVR);
     encodersGet(&current);
+  }
+}
+
+void sensorsGetOneStep(sensors* Sensors, sensors* New, int steps) {
+  // TODO use sensorsSet instead
+  if (Sensors->encodersL != 0) New->encodersL = Sensors->encodersL/steps;
+  if (Sensors->encodersR != 0) New->encodersR = Sensors->encodersR/steps;
+}
+
+void constAcceleration (int initialVL, int initialVR, int finalVL, int finalVR, sensors* toBe, int steps) {
+
+  // iVL and fVL must be of the same sign
+  
+  // stop (or better, go normal) if initial and final are equal
+
+  int stepVL = abs(initialVL-finalVL)/steps;
+  int stepVR = abs(initialVR-finalVR)/steps;
+  bool positiveL = (initialVL < finalVL);
+  bool positiveR = (initialVR < finalVR);
+  int newVL;
+  int newVR;
+  sensors current;
+  sensors initial;
+  sensors toBeStep;
+  sensorsGetOneStep(toBe, &toBeStep, steps);
+
+  encodersGet(&current);
+  encodersSet(&initial, current.encodersL, current.encodersR);
+  while(1) {
+    newVL = initialVL;
+    newVR = initialVR;
+
+    changeVelocity((newVL-stepVL), (newVR-stepVR), newVL, newVR, &toBeStep, &toBeStep);
+    
+    /* Calculating new speed */
+    if (positiveL) {
+      if (newVL+stepVL <= finalVL) initialVL += stepVL;
+      if (newVR+stepVR <= finalVR) initialVR += stepVR;
+    } else {
+      if (newVL-stepVL >= finalVL) initialVL -= stepVL;
+      if (newVR-stepVL >= finalVR) initialVR -= stepVR;
+    }
+
+    encodersGet(&current);
+    if (!sensorsToBe(&current, &initial, toBe)) return;
   }
 }
 
@@ -155,19 +204,16 @@ bool sensorsToBe(sensors* Sensors, sensors* initial, sensors* toBe) {
 }
 
 void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) {
+  // implement expectations
   int i = 0;
+  int sensorInvolved = 0;
   elaborated[i] = strtok (buf," ");
   
   if (!strcmp(elaborated[i], ".\n")) return;
   while (elaborated[i++] != NULL) {
     elaborated[i] = strtok (NULL, " ");
   }
-  
-  #ifdef DEBUG
-  printf("PARSE %s %s\n", elaborated[0], elaborated[1]);
-  printf("PARSE %s %s\n", elaborated[2], elaborated[3]);
 //  if (!funcNumber) return; // if 0 no function if 9 this function...
-  #endif
   
   if (!strcmp(elaborated[0], "W")) {
     memset(elaborated, 0, 80);
@@ -178,7 +224,11 @@ void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) 
 
   if (funcNumber == SMELR || (!strcmp(elaborated[0], "S") && !strcmp(elaborated[1], "MELR"))) {
     encodersParse(elaborated, Sensors);
+    sensorInvolved++;
   }
+
+  if (sensorInvolved == 0)
+    printf("PARSE %s %s %s %s\n", elaborated[0], elaborated[1], elaborated[2], elaborated[3]);
 }
 
 void moveAtVoltage(int voltage1, int voltage2) {

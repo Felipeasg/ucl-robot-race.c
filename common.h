@@ -12,7 +12,7 @@ typedef struct {
 
 
 int abs (int);
-void constAcceleration (int, int, int, int, sensors*, sensors*);
+void constAcceleration (int, int, int, int, sensors*, int);
 
 int getProportion(int, int);
 
