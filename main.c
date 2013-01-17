@@ -16,8 +16,8 @@
 int main () {
   initSocket();
 
-  sensors toBeTravelled1 = {.encodersL = 300, .encodersR = 300 };
-  sensors toBeTravelled2 = {.encodersL = 1000, .encodersR = 1000 };
+  sensors toBeTravelled1 = {.encodersL = 150, .encodersR = 150 };
+  sensors toBeTravelled2 = {.encodersL = 300, .encodersR = 300 };
   encodersReset();
   // 
   // considerSlide(0, 0, 100, 100, &toBeTravelled1);
