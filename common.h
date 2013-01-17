@@ -2,12 +2,15 @@
 #define FUNCTIONS_INCLUDED
 
 #define SMELR 1
+#define SBFLR 2
 
 char buf[80];
 
 typedef struct {
   int encodersL;
   int encodersR;
+  int bumpersL;
+  int bumpersR;
 } sensors;
 
 

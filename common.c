@@ -8,6 +8,7 @@
 #include <string.h>
 #include "common.h"
 #include "sensors/encoders.h"
+#include "sensors/bumpers.h"
 
 #define WHEELREVOLUTION 100 * 3.14159
 #define WHEELDISTANCE 240
