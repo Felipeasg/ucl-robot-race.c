@@ -3,6 +3,7 @@
 
 #define SMELR 1
 #define SBFLR 2
+#define SIFLR 3
 
 char buf[80];
 
@@ -11,6 +12,8 @@ typedef struct {
   int encodersR;
   int bumpersL;
   int bumpersR;
+  int rangeFL;
+  int rangeFR;
 } sensors;
 
 
