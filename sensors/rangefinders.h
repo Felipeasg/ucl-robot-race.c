@@ -1,5 +1,5 @@
-#ifndef ENCODERS_INCLUDED
-#define ENCODERS_INCLUDED
+#ifndef RANGEFINDERS_INCLUDED
+#define RANGEFINDERS_INCLUDED
 
 void rangeFCmd();
 void rangeFGet(sensors* Sensors);

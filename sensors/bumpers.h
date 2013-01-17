@@ -1,5 +1,5 @@
-#ifndef ENCODERS_INCLUDED
-#define ENCODERS_INCLUDED
+#ifndef BUMPERS_INCLUDED
+#define BUMPERS_INCLUDED
 
 void bumpersCmd();
 void bumpersGet(sensors* Sensors);
