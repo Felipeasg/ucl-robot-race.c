@@ -4,6 +4,8 @@
 #define SMELR 1
 #define SBFLR 2
 #define SIFLR 3
+#define SISLR 3
+
 
 char buf[80];
 
