@@ -14,6 +14,8 @@ typedef struct {
   int bumpersR;
   int rangeFL;
   int rangeFR;
+  int rangeSL;
+  int rangeSR;
 } sensors;
 
 
