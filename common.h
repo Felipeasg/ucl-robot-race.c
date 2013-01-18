@@ -20,6 +20,8 @@ typedef struct {
   int rangeSR;
 } sensors;
 
+extern sensors DEFAULT_SENSORS;
+
 
 int abs (int);
 void constAcceleration (int, int, int, int, sensors*, int);

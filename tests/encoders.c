@@ -29,7 +29,7 @@ static char * all_tests() {
 
 static char * encodersGet_test() {
   /* Scenario */
-    sensors Sensors;
+    sensors Sensors = DEFAULT_SENSOR;
 
     describe("In normal case");
     encodersGet(&Sensors);

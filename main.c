@@ -16,18 +16,28 @@
 int main () {
   initSocket();
 
-  sensors toBeTravelled1 = {.encodersL = 100, .encodersR = 100 };
-  sensors toBeTravelled2 = {.encodersL = 100, .encodersR = 100 };
+  sensors toBeTravelled1 = DEFAULT_SENSORS;
+  toBeTravelled1.encodersL = 200;
+  toBeTravelled1.encodersR = 200;
+//  sensors toBeTravelled2 = {.encodersL = 80, .encodersR = 80 };
   encodersReset();
   // 
-  // considerSlide(0, 0, 100, 100, &toBeTravelled1);
-  // considerSlide(100, 100, 50, 50, &toBeTravelled2);
-  // changeVelocity(100, 100, 50, 50, &toBeTravelled1, &toBeTravelled2);
-  // stopMovement();
+//  considerSlide(0, 0, 100, 100, &toBeTravelled1);
+//  considerSlide(100, 100, 50, 50, &toBeTravelled2);
+//  changeVelocity(100, 100, 50, 50, &toBeTravelled1, &toBeTravelled2);
+//  stopMovement();
 
-  considerSlide(0, 0, 50, 50, &toBeTravelled1);
-  considerSlide(100, 100, 0, 0, &toBeTravelled1);
-  constAcceleration (0, 0, 100, 100, &toBeTravelled1, 20);
+  sensors current = DEFAULT_SENSORS;
+  sensors initial = DEFAULT_SENSORS;
+  while(sensorsToBe(&current, &initial, &toBeTravelled1)) {
+    moveAtVoltage(50, 50);
+    encodersGet(&current);
+  }
+
+
+  // considerSlide(0, 0, 50, 50, &toBeTravelled1);
+  // considerSlide(100, 100, 0, 0, &toBeTravelled1);
+  // constAcceleration (0, 0, 100, 100, &toBeTravelled1, 20);
 
   return 0;
 }

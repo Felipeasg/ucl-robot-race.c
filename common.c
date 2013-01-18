@@ -15,18 +15,32 @@
 #define WHEELREVOLUTION 100 * 3.14159
 #define WHEELDISTANCE 240
 
+sensors DEFAULT_SENSORS = {
+  .encodersL = 0,
+  .encodersR = 0,
+  .bumpersL = 0,
+  .bumpersR = 0,
+  .rangeFL = 0,
+  .rangeFR = 0,
+  .rangeSL = 0,
+  .rangeSR = 0
+};
+
 int sock = -1;
 
 int abs (int value) {
+
   if (value < 0) return -value;
   return value;
 }
 
 int getProportion(int number, int proportion) {
+
   return (proportion/100)*number;
 }
 
 float getSlide(int m, int n) {
+
   m = m/10;
   printf("%i\n",m);
   n = n/10;
@@ -43,13 +57,14 @@ float getSlide(int m, int n) {
 void considerSlide(int fromVL, int fromVR, int toVL, int toVR, sensors* Sensors) {
   int slideVL = getSlide(fromVL, toVL);
   int slideVR = getSlide(fromVR, toVR);
+
   Sensors->encodersL -= slideVL;
   Sensors->encodersR -= slideVR;
 }
 
 void changeVelocity (int fromVL, int fromVR, int toVL, int toVR, sensors* toBeInitial, sensors* toBeFinal) { //TODO pass left and right
-  sensors current; // should be global
-  sensors initial;
+  sensors current = DEFAULT_SENSORS; // should be global
+  sensors initial = DEFAULT_SENSORS;
 
   encodersGet(&current); //TODO they must be equal!
   printf("changeVelocity initial from %d:%d and encoders: %d:%d\n", fromVL, fromVR, current.encodersL, current.encodersR);
@@ -73,6 +88,7 @@ void changeVelocity (int fromVL, int fromVR, int toVL, int toVR, sensors* toBeIn
 }
 
 void sensorsGetOneStep(sensors* Sensors, sensors* New, int steps) {
+
   // TODO use sensorsSet instead
   if (Sensors->encodersL != 0) New->encodersL = Sensors->encodersL/steps;
   if (Sensors->encodersR != 0) New->encodersR = Sensors->encodersR/steps;
@@ -89,9 +105,10 @@ void constAcceleration (int initialVL, int initialVR, int finalVL, int finalVR, 
   
   // stop (or better, go normal) if initial and final are equal
   
-  int newVL;
-  int newVR;
-  sensors current, initial, toBeStep;
+  int newVL = 0;
+  int newVR = 0;
+
+  sensors current = DEFAULT_SENSORS, initial = DEFAULT_SENSORS, toBeStep = DEFAULT_SENSORS;
   sensorsGetOneStep(toBe, &toBeStep, steps);
   encodersSet(&toBeStep, toBeStep.encodersL/2, toBeStep.encodersR/2);
 
@@ -148,6 +165,7 @@ void constAcceleration (int initialVL, int initialVR, int finalVL, int finalVR, 
 
 int initSocket() {
   struct sockaddr_in s_addr;
+
   if (sock != -1) {
     close(sock);
     sock = -1;
@@ -195,6 +213,7 @@ bool inAngle(int angleIR) {
 */
 
 bool inLimit(int voltage) {
+
   if (voltage <= 127 && voltage >= -127)
     return true;
   
@@ -202,12 +221,14 @@ bool inLimit(int voltage) {
 }
 
 void stopIf (bool status) {
+
   if (status) exit(1);
 }
 
 /* Level abstraction: 0 start */
 
 int writeCmd(char *msg, int len) {
+
   if (write(sock, msg, len) <= 0) {
     /* the write failed - likely the robot was switched off - attempt
        to reconnect and reinitialize */
@@ -220,6 +241,7 @@ int writeCmd(char *msg, int len) {
 
 int readCmd(char* buf, int bufsize) {
   int val;
+
   fd_set read_fdset;
   fd_set except_fdset;
   struct timeval tv;
@@ -258,7 +280,6 @@ void nextCmd() {
 }
 
 bool sensorToBe(int current, int initial, int toBe ) {
-  int l,r;
 
   if (abs(abs(current) - abs(initial)) >= abs(toBe)) // TODO
     return false;
@@ -268,11 +289,14 @@ bool sensorToBe(int current, int initial, int toBe ) {
 
 bool sensorsToBe(sensors* Sensors, sensors* initial, sensors* toBe) {
   // TODO SENSOR CHECKING
-  bool encoders, bumpers, rangeF, rangeS;
+  bool encoders = false, bumpers = false, rangeF = false, rangeS = false;
+
   if (toBe->encodersL != 0 || toBe->encodersR != 0) { encoders = encodersToBe(Sensors, initial, toBe); }
   if (toBe->rangeFL != 0 || toBe->rangeFR != 0) { rangeF = rangeFToBe(Sensors, initial, toBe); }
+  if (toBe->rangeSL != 0 || toBe->rangeSR != 0) { rangeS = rangeSToBe(Sensors, initial, toBe); }
   
-  if (!encoders && !rangeF) return false;
+  printf("rangeF: %d %d %d %d\n", rangeF, rangeS, bumpers, encoders);
+  if (!encoders && !rangeF && !rangeS) return false;
   else return true;
 }
 
@@ -280,6 +304,7 @@ void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) 
   // implement expectations
   int i = 0;
   int sensorInvolved = 0;
+
   elaborated[i] = strtok (buf," ");
   
   if (!strcmp(elaborated[i], ".\n")) return;
@@ -305,6 +330,7 @@ void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) 
 }
 
 void moveAtVoltage(int voltage1, int voltage2) {
+
   stopIf(!inLimit(voltage1) || !inLimit(voltage2));
   sprintf(buf, "M LR %i %i\n", voltage1, voltage2);
   #ifdef DEBUG
@@ -314,6 +340,7 @@ void moveAtVoltage(int voltage1, int voltage2) {
 }
 
 void stopMovement() {
+
   sprintf(buf, "M LR 0 0\n");
   #ifdef DEBUG
   printf("M LR 0 0\n");
@@ -321,6 +348,7 @@ void stopMovement() {
   nextCmd();
 }
 void stopMovementWhen(bool condition) {
+
   if (condition) stopMovement();
 }
 
@@ -328,11 +356,13 @@ void stopMovementWhen(bool condition) {
 
 /* Level abstraction: 1 start */
 void turnOnSpotAtVoltage(int voltage) {
+
   moveAtVoltage(voltage, -voltage);
   nextCmd();
 }
 
 void moveStraightAtVoltage(int voltage) {
+
   moveAtVoltage(voltage, voltage);
 }
 /* Level abstraction: 1 end */
@@ -344,6 +374,7 @@ void moveStraightAtVoltage(int voltage) {
 
 int gp2d120_ir_to_dist(int ir) {		//2 IR sensors on side
     int dist;
+
     if (ir >80)
        dist = (2914 / (ir + 4)) - 1;
 else dist = 40;
@@ -352,6 +383,7 @@ return dist;
 
 int gp2d12_ir_to_dist(int ir) {			//2 IR sensors on front
     int dist;
+
     if (ir >35)
        dist = (6787 / (ir - 3)) - 4;
 else dist = 200;

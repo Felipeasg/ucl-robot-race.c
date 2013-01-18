@@ -10,7 +10,7 @@
 
 
 void encodersCmd() {
-  sprintf(buf, "S MELR\n");
+  snprintf(buf, 80, "S MELR\n");
   #ifdef DEBUG
   printf("S MELR\n");
   #endif
@@ -39,7 +39,7 @@ int encodersParse(char* elaborated[], sensors* Sensors) {
 }
 
 void encodersReset() {
-  sprintf(buf, "C RME\n");
+  snprintf(buf, 80, "C RME\n");
   #ifdef DEBUG
   printf("C RME\n");
   #endif
