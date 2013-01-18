@@ -29,7 +29,7 @@ static char * all_tests() {
 
 static char * encodersGet_test() {
   /* Scenario */
-    sensors Sensors = DEFAULT_SENSOR;
+    sensors Sensors = DEFAULT_SENSORS;
 
     describe("In normal case");
     encodersGet(&Sensors);
@@ -58,10 +58,10 @@ static char * encodersCmd_test() {
 
 static char * encodersToBe_test() {
   /* Scenario */
-    sensors current;
-    sensors initial;
-    sensors toBe;
-    bool status;
+    sensors current = DEFAULT_SENSORS;
+    sensors initial = DEFAULT_SENSORS;
+    sensors toBe = DEFAULT_SENSORS;
+    bool status = false;
     
     describe("In normal case");
     current = (sensors){.encodersL = 200, .encodersR = 200};

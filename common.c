@@ -40,16 +40,16 @@ int getProportion(int number, int proportion) {
 }
 
 float getSlide(int m, int n) {
+  float series1, series2;
 
   m = m/10;
-  printf("%i\n",m);
+  //printf("%i\n",m);
   n = n/10;
-  printf("%i\n",n);
-  float series1, series2;
+  // printf("%i\n",n);
   series1 = ((float)m/2)*(10+(float)m*10)/20;
-  printf("%f\n",series1);
+  // printf("%f\n",series1);
   series2 = ((float)n/2)*(10+(float)n*10)/20;
-  printf("%f\n",series2);
+  // printf("%f\n",series2);
   return abs(series2-series1);
 }
 
@@ -294,9 +294,9 @@ bool sensorsToBe(sensors* Sensors, sensors* initial, sensors* toBe) {
   if (toBe->encodersL != 0 || toBe->encodersR != 0) { encoders = encodersToBe(Sensors, initial, toBe); }
   if (toBe->rangeFL != 0 || toBe->rangeFR != 0) { rangeF = rangeFToBe(Sensors, initial, toBe); }
   if (toBe->rangeSL != 0 || toBe->rangeSR != 0) { rangeS = rangeSToBe(Sensors, initial, toBe); }
-  
-  printf("rangeF: %d %d %d %d\n", rangeF, rangeS, bumpers, encoders);
-  if (!encoders && !rangeF && !rangeS) return false;
+  bumpers = bumpersToBe(Sensors, toBe); //TODO improve this
+
+  if (!encoders && !rangeF && !rangeS && !bumpers) return false;
   else return true;
 }
 
@@ -322,6 +322,18 @@ void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) 
 
   if (funcNumber == SMELR || (!strcmp(elaborated[0], "S") && !strcmp(elaborated[1], "MELR"))) {
     encodersParse(elaborated, Sensors);
+    sensorInvolved++;
+  }
+  if (funcNumber == SBFLR || (!strcmp(elaborated[0], "S") && !strcmp(elaborated[1], "SBFLR"))) {
+    bumpersParse(elaborated, Sensors);
+    sensorInvolved++;
+  }
+  if (funcNumber == SIFLR || (!strcmp(elaborated[0], "S") && !strcmp(elaborated[1], "SIFLR"))) {
+    rangeFParse(elaborated, Sensors);
+    sensorInvolved++;
+  }
+  if (funcNumber == SISLR || (!strcmp(elaborated[0], "S") && !strcmp(elaborated[1], "SISLR"))) {
+    rangeSParse(elaborated, Sensors);
     sensorInvolved++;
   }
 
