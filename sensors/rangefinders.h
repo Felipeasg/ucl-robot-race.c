@@ -13,4 +13,8 @@ int rangeSParse(char**, sensors*);
 void rangeSSet(sensors*, int, int);
 bool rangeSToBe(sensors*, sensors*, sensors*);
 
+int gp2d120_ir_to_dist(int);
+int gp2d12_ir_to_dist(int);
+int dist_to_gp2d120_ir(int);
+
 #endif

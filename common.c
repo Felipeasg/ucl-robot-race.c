@@ -276,7 +276,7 @@ int readCmd(char* buf, int bufsize) {
 
 
 void nextCmd() {
-  writeCmd(buf, strlen(buf)); memset(buf, 0, 80); read(sock, buf, 80);
+  writeCmd(buf, strlen(buf)); memset(buf, 0, 80); read(sock, buf, 80); // TODO talk with prof
 }
 
 bool sensorToBe(int current, int initial, int toBe ) {
@@ -383,21 +383,3 @@ void moveStraightAtVoltage(int voltage) {
 // TODO
 // turn very slowly
 // move as fast as he can.
-
-int gp2d120_ir_to_dist(int ir) {		//2 IR sensors on side
-    int dist;
-
-    if (ir >80)
-       dist = (2914 / (ir + 4)) - 1;
-else dist = 40;
-return dist;
-}
-
-int gp2d12_ir_to_dist(int ir) {			//2 IR sensors on front
-    int dist;
-
-    if (ir >35)
-       dist = (6787 / (ir - 3)) - 4;
-else dist = 200;
-return dist;
-}
