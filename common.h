@@ -5,6 +5,7 @@
 #define SBFLR 2
 #define SIFLR 3
 #define SISLR 4
+#define SUS 5
 
 
 char buf[80];
@@ -18,9 +19,17 @@ typedef struct {
   int rangeFR;
   int rangeSL;
   int rangeSR;
+  int us;
 } sensors;
 
+typedef struct {
+  bool spin;
+  bool reposition;
+  bool straight;
+} status;
+
 extern sensors DEFAULT_SENSORS;
+extern status DEFAULT_STATUS;
 
 
 int abs (int);

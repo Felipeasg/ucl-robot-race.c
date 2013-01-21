@@ -10,6 +10,7 @@
 #include "sensors/encoders.h"
 #include "sensors/bumpers.h"
 #include "sensors/rangefinders.h"
+#include "sensors/us.h"
 
 
 #define WHEELREVOLUTION 100 * 3.14159
@@ -23,7 +24,14 @@ sensors DEFAULT_SENSORS = {
   .rangeFL = 0,
   .rangeFR = 0,
   .rangeSL = 0,
-  .rangeSR = 0
+  .rangeSR = 0,
+  .us = 0
+};
+
+status DEFAULT_STATUS = {
+  .reposition = false,
+  .spin = false,
+  .straight = false
 };
 
 int sock = -1;
@@ -334,6 +342,10 @@ void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) 
   }
   if (funcNumber == SISLR || (!strcmp(elaborated[0], "S") && !strcmp(elaborated[1], "SISLR"))) {
     rangeSParse(elaborated, Sensors);
+    sensorInvolved++;
+  }
+  if (funcNumber == SUS || (!strcmp(elaborated[0], "S") && !strcmp(elaborated[1], "US"))) {
+    usParse(elaborated, Sensors);
     sensorInvolved++;
   }
 

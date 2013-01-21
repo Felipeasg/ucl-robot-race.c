@@ -32,7 +32,7 @@ int rangeFParse(char* elaborated[], sensors* Sensors) {
   if (elaborated[2] == NULL || elaborated[3] == NULL ||
       !strcmp(elaborated[2],"") || !strcmp(elaborated[3],"") ) return 1;
 
-  rangeFSet(Sensors, gp2d120_ir_to_dist(atoi(elaborated[2])), gp2d120_ir_to_dist(atoi(elaborated[3])) );
+  rangeFSet(Sensors, gp2d12_ir_to_dist(atoi(elaborated[2])), gp2d12_ir_to_dist(atoi(elaborated[3])) );
   // it should be 0 for failure, 1 for silent, 2 for OK
   return 2;
 }
@@ -119,24 +119,3 @@ int gp2d12_ir_to_dist(int ir) {			//2 IR sensors on front
   else dist = 200;
     return dist;
 }
-    
-int dist_to_gp2d120_ir(int dist) {
-  int volts, result;
-  float value;
-
-  if (dist < 3)
-    volts = 3 * dist / 3;
-  else 
-    volts = 13 / (dist + 0.42);
-  
-  value = 1024 * volts / 5.0;
-  result = value;
-  return result;
-}
-
-
-
-
-
-
-
