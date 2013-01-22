@@ -77,59 +77,72 @@ int reposition(sensors* current, int encodersL, int encodersR, int voltageL, int
 int shouldReposition(sensors* current) {
   status decision = DEFAULT_STATUS;
 
-  printf("PARSE %i %i %i %i\n", current->rangeSL, current->rangeSR, current->rangeFL, current->rangeFR);
+  printf("PARSE sl%i sr%i fl%i fr%i us%i\n", current->rangeSL, current->rangeSR, current->rangeFL, current->rangeFR, current->us);
 
-  // US out of range
-  if (current->us >= RANGEUS) {
-    if (current->rangeFL <= RANGEFL || current->rangeFR <= RANGEFR ) {decision.straight = true;}
-    if (current->rangeSL <= RANGESL || current->rangeSR <= RANGESR ) {decision.straight = true;}
-    if (decision.straight == true) return 0;
+  if (current->us <= 100) {
+    if (current->rangeFL < 100) {
+      fflush(stdout);
+      printf("close US, reposition FL\n");
+      reposition(current, 30, 15, 30, 15);
+      return 1;
+    } else if (current->rangeFR < 100) {
+      fflush(stdout);
+      printf("close US, reposition FR\n");
+      reposition(current, 15, 30, 15, 30);
+      return 1;
+    }
+    return 0;
+  }
+  
+  // If rangeFL/FR in range or rangeSL/SR in range
+  if (current->rangeFL <= RANGEFL || current->rangeFR <= RANGEFR ) {decision.straight = true;}
+  if (current->rangeSL <= RANGESL || current->rangeSR <= RANGESR ) {decision.straight = true;}
+  if (decision.straight == true) {
+    fflush(stdout);
+    printf("we can go straight\n");
+    return 0;
+  }
+  
+  // TODO track previous position of SL SR and turn when it is not touching
 
-    if (current->rangeFL <= 100) {
 
-      // Left pivot - Right is empty && SL is touching
-      if (current->rangeFR == 100 && current->rangeSR == 40 && current->rangeSL <= 40 ) {
-        reposition(current, 15, 30, 15, 30);
-        return 1;
+    
+    if (current->rangeFL >= 85) {
+      if (current->rangeFR == 100 && current->rangeSR == 40) {
+        fflush(stdout);
+         printf("FL pivot\n");
+         reposition(current, 15, 30, 15, 30);
+         return 1;
       }
-    } else if (current->rangeFR <= 100) {
-
-      // Right pivot - Left is empty && SR is touching
-      if (current->rangeFL == 100 && current->rangeSL == 40 && current->rangeSR <= 40 ) {
-        return 1;
+    }
+    
+    if (current->rangeFR >= 85) {
+      if (current->rangeFR == 100 && current->rangeSR == 40) {
+        fflush(stdout);
+         printf("FR pivot\n");
+         reposition(current, 15, 30, 15, 30);
+         return 1;
       }
     }
 
-  } else
+    // LeftS pivot - Right is empty && SL is touching
+    if (current->rangeFR == 100 && current->rangeSR == 40 && current->rangeSL < 40 ) {
+      fflush(stdout);
+      printf("SL pivot\n");
+      reposition(current, 15, 30, 15, 30);
+      return 1;
+    }
 
-  if (current->us < RANGEUS) {
 
-    if (current->us <= 90 && current->rangeFL < 100) {
+    // Right pivot - Left is empty && SR is touching
+    if (current->rangeFL == 100 && current->rangeSL == 40 && current->rangeSR < 40 ) {
+      fflush(stdout);
+      printf("SR pivot\n");
       reposition(current, 30, 15, 30, 15);
       return 1;
     }
-    if (current->rangeFL <= RANGEFL || current->rangeFR <= RANGEFR ) {decision.straight = true;}
-    if (current->rangeSL <= RANGESL || current->rangeSR <= RANGESR ) {decision.straight = true;}
-    if (decision.straight == true) return 0;
+
     
-    // TODO track previous position of SL SR and turn when it is not touching
-
-    if (current->rangeFL <= 100) {
-
-      // Left pivot - Right is empty && SL is touching
-      if (current->rangeFR == 100 && current->rangeSR == 40 && current->rangeSL <= 40 ) {
-        reposition(current, 15, 30, 15, 30);
-        return 1;
-      }
-    } else if (current->rangeFR <= 100) {
-
-      // Right pivot - Left is empty && SR is touching
-      if (current->rangeFL == 100 && current->rangeSL == 40 && current->rangeSR <= 40 ) {
-        return 1;
-      }
-    }
-    
-  }
   return 3;
 }
 
@@ -194,23 +207,16 @@ int main () {
   int decision = 0;
 
   while (1) {
-    fflush(stdout);
-    printf("start looping\n");
-    // Go straigtasdash
+    
     usGet(&current);
     rangeFGet(&current);
     rangeSGet(&current);
     
     decision = shouldReposition(&current);
-    fflush(stdout);
-    printf("decision %i\n", decision);
 
     if (!decision) {
       moveAtVoltage(20, 20);
     }
-    
-    fflush(stdout);
-    printf("finish looping\n");
   }
 
   return 0;
