@@ -60,43 +60,45 @@
 // }
 
 
-int reposition(sensors* current, int encodersL, int encodersR, int voltageL, int voltageR) {
+void reposition(robot* r, int encodersL, int encodersR, int voltageL, int voltageR) {
   sensors toBe = DEFAULT_SENSORS;
   sensors initial = DEFAULT_SENSORS;
-  encodersSet(&initial, current->encodersL, current->encodersR);
+  encodersSet(&initial, r->s.encodersL, r->s.encodersR);
   encodersSet(&toBe, encodersL, encodersR);
 
-  encodersGet(current);
-  while (sensorsToBe(current, &initial, &toBe)) {
+  encodersGet(&r->s);
+  while (sensorsToBe(&r->s, &initial, &toBe)) {
     moveAtVoltage(voltageL, voltageR);
-    encodersGet(current);
+    encodersGet(&r->s);
   }
 }
 
 // 0 if staight, 1 if reposition, 2 if spinning, 3 if stopping
-int shouldReposition(sensors* current) {
+int shouldReposition(robot* r) {
+  sensors* s = &r->s;
+  volts* v = &r->v;
   status decision = DEFAULT_STATUS;
 
-  printf("PARSE sl%i sr%i fl%i fr%i us%i\n", current->rangeSL, current->rangeSR, current->rangeFL, current->rangeFR, current->us);
+  printf("PARSE sl%i sr%i fl%i fr%i us%i\n", s->rangeSL, s->rangeSR, s->rangeFL, s->rangeFR, s->us);
 
-  if (current->us <= 100) {
-    if (current->rangeFL < 100) {
+  if (s->us <= 100) {
+    if (s->rangeFL < 100) {
       fflush(stdout);
       printf("close US, reposition FL\n");
-      reposition(current, 30, 15, 30, 15);
+      reposition(r, 30, 15, 30, 15);
       return 1;
-    } else if (current->rangeFR < 100) {
+    } else if (s->rangeFR < 100) {
       fflush(stdout);
       printf("close US, reposition FR\n");
-      reposition(current, 15, 30, 15, 30);
+      reposition(r, 15, 30, 15, 30);
       return 1;
     }
     return 0;
   }
   
   // If rangeFL/FR in range or rangeSL/SR in range
-  if (current->rangeFL <= RANGEFL || current->rangeFR <= RANGEFR ) {decision.straight = true;}
-  if (current->rangeSL <= RANGESL || current->rangeSR <= RANGESR ) {decision.straight = true;}
+  if (s->rangeFL <= RANGEFL || s->rangeFR <= RANGEFR ) {decision.straight = true;}
+  if (s->rangeSL <= RANGESL || s->rangeSR <= RANGESR ) {decision.straight = true;}
   if (decision.straight == true) {
     fflush(stdout);
     printf("we can go straight\n");
@@ -107,38 +109,38 @@ int shouldReposition(sensors* current) {
 
 
     
-    if (current->rangeFL >= 85) {
-      if (current->rangeFR == 100 && current->rangeSR == 40) {
+    if (s->rangeFL >= 85) {
+      if (s->rangeFR == 100 && s->rangeSR == 40) {
         fflush(stdout);
          printf("FL pivot\n");
-         reposition(current, 15, 30, 15, 30);
+         reposition(r, 15, 30, 15, 30);
          return 1;
       }
     }
     
-    if (current->rangeFR >= 85) {
-      if (current->rangeFR == 100 && current->rangeSR == 40) {
+    if (s->rangeFR >= 85) {
+      if (s->rangeFR == 100 && s->rangeSR == 40) {
         fflush(stdout);
          printf("FR pivot\n");
-         reposition(current, 15, 30, 15, 30);
+         reposition(r, 15, 30, 15, 30);
          return 1;
       }
     }
 
     // LeftS pivot - Right is empty && SL is touching
-    if (current->rangeFR == 100 && current->rangeSR == 40 && current->rangeSL < 40 ) {
+    if (s->rangeFR == 100 && s->rangeSR == 40 && s->rangeSL < 40 ) {
       fflush(stdout);
       printf("SL pivot\n");
-      reposition(current, 15, 30, 15, 30);
+      reposition(r, 15, 30, 15, 30);
       return 1;
     }
 
 
     // Right pivot - Left is empty && SR is touching
-    if (current->rangeFL == 100 && current->rangeSL == 40 && current->rangeSR < 40 ) {
+    if (s->rangeFL == 100 && s->rangeSL == 40 && s->rangeSR < 40 ) {
       fflush(stdout);
       printf("SR pivot\n");
-      reposition(current, 30, 15, 30, 15);
+      reposition(r, 30, 15, 30, 15);
       return 1;
     }
 
@@ -195,7 +197,7 @@ int main () {
   //   // reposition(minCase, maxCase);
   // }
   
-  sensors current = DEFAULT_SENSORS;
+  robot r = {.s= DEFAULT_SENSORS, .v= DEFAULT_VOLTS};
   sensors limits = DEFAULT_SENSORS;
   
   status usStatus = DEFAULT_STATUS;
@@ -208,11 +210,11 @@ int main () {
 
   while (1) {
     
-    usGet(&current);
-    rangeFGet(&current);
-    rangeSGet(&current);
+    usGet(&r.s);
+    rangeFGet(&r.s);
+    rangeSGet(&r.s);
     
-    decision = shouldReposition(&current);
+    decision = shouldReposition(&r);
 
     if (!decision) {
       moveAtVoltage(20, 20);

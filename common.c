@@ -34,6 +34,11 @@ status DEFAULT_STATUS = {
   .straight = false
 };
 
+volts DEFAULT_VOLTS = {
+  .l = 0,
+  .r = 0
+};
+
 int sock = -1;
 
 int abs (int value) {

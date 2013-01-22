@@ -34,12 +34,13 @@ typedef struct {
 } volts;
 
 typedef struct {
-  sensors* sensors;
-  volts* volts;
+  sensors s;
+  volts v;
 } robot;
 
 extern sensors DEFAULT_SENSORS;
 extern status DEFAULT_STATUS;
+extern volts DEFAULT_VOLTS;
 
 
 int abs (int);
