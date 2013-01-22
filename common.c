@@ -363,6 +363,10 @@ void moveAtVoltage(int voltage1, int voltage2) {
   nextCmd();
 }
 
+void move(volts* current) {
+  moveAtVoltage(current->l, current->r);
+}
+
 void stopMovement() {
 
   sprintf(buf, "M LR 0 0\n");

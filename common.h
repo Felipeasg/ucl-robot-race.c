@@ -28,6 +28,16 @@ typedef struct {
   bool straight;
 } status;
 
+typedef struct {
+  int l;
+  int r;
+} volts;
+
+typedef struct {
+  sensors* sensors;
+  volts* volts;
+} robot;
+
 extern sensors DEFAULT_SENSORS;
 extern status DEFAULT_STATUS;
 
