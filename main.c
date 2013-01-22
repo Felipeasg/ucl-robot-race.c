@@ -197,7 +197,7 @@ int main () {
   //   // reposition(minCase, maxCase);
   // }
   
-  robot r = {.s= DEFAULT_SENSORS, .v= DEFAULT_VOLTS};
+  robot r = {.s= DEFAULT_SENSORS, .v= (volts){r: 20, l: 20}};
   sensors limits = DEFAULT_SENSORS;
   
   status usStatus = DEFAULT_STATUS;
@@ -217,7 +217,7 @@ int main () {
     decision = shouldReposition(&r);
 
     if (!decision) {
-      moveAtVoltage(20, 20);
+      move(&r.v);
     }
   }
 

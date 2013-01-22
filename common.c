@@ -368,8 +368,8 @@ void moveAtVoltage(int voltage1, int voltage2) {
   nextCmd();
 }
 
-void move(volts* current) {
-  moveAtVoltage(current->l, current->r);
+void move(volts* v) {
+  moveAtVoltage(v->l, v->r);
 }
 
 void stopMovement() {
