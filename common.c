@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include "queue.h"
 #include "common.h"
 #include "sensors/encoders.h"
 #include "sensors/bumpers.h"
