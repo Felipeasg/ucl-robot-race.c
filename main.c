@@ -159,6 +159,7 @@ int main () {
   
   logs l;
   l.index = -1;
+  l.empty = true;
   robot r = {.s= DEFAULT_SENSORS, .v= (volts){r: 20, l: 20}};
 
   while (1) {

@@ -9,7 +9,10 @@
 #include "common.h"
 
 void addLog(sensors* s, logs* l) {
-  if (++(l->index) > 4 ) l->index = 0;
+  if (++(l->index) > 4 ) {
+    if (l->empty == true) l->empty = false;
+    l->index = 0;
+  }
   memcpy(&l->sensors[l->index], s, sizeof(sensors));
-  printf("index %i eg: %i \n", l->index, l->sensors[l->index].us);
+  printf("index %i count %d eg: %i \n", l->index, l->empty,  l->sensors[l->index].us);
 }
