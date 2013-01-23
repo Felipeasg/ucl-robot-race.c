@@ -242,11 +242,12 @@ int main () {
     rangeSGet(&r.s);
     addLog(&r.s, &l);
     
-    decision = shouldReposition(&r);
-
-    if (!decision) {
-      move(&r.v);
-    }
+    // decision = shouldReposition(&r);
+    // 
+    // if (!decision) {
+    //   move(&r.v);
+    // }
+    printf("{us: %i,rangeSL: %i,rangeSR: %i,rangeFL: %i,rangeFR: %i}",r.s.us,r.s.rangeSL,r.s.rangeSR,r.s.rangeFL,r.s.rangeFR);
   }
 
   return 0;
