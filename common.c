@@ -109,6 +109,7 @@ void sensorsGetOneStep(sensors* Sensors, sensors* New, int steps) {
   if (Sensors->rangeSR != 0) New->rangeSR = Sensors->rangeSR/steps;
   if (Sensors->rangeFL != 0) New->rangeFL = Sensors->rangeFL/steps;
   if (Sensors->rangeFR != 0) New->rangeFR = Sensors->rangeFR/steps;
+  if (Sensors->us != 0) New->us = Sensors->us/steps;
 }
 
 void constAcceleration (int initialVL, int initialVR, int finalVL, int finalVR, sensors* toBe, int steps) {
@@ -302,14 +303,15 @@ bool sensorToBe(int current, int initial, int toBe ) {
 
 bool sensorsToBe(sensors* Sensors, sensors* initial, sensors* toBe) {
   // TODO SENSOR CHECKING
-  bool encoders = false, bumpers = false, rangeF = false, rangeS = false;
+  bool encoders = false, bumpers = false, rangeF = false, rangeS = false, us = false;
 
   if (toBe->encodersL != 0 || toBe->encodersR != 0) { encoders = encodersToBe(Sensors, initial, toBe); }
   if (toBe->rangeFL != 0 || toBe->rangeFR != 0) { rangeF = rangeFToBe(Sensors, initial, toBe); }
   if (toBe->rangeSL != 0 || toBe->rangeSR != 0) { rangeS = rangeSToBe(Sensors, initial, toBe); }
+  if (toBe->us != 0) { us = usToBe(Sensors, initial, toBe); }
   bumpers = bumpersToBe(Sensors, toBe); //TODO improve this
 
-  if (!encoders && !rangeF && !rangeS && !bumpers) return false;
+  if (!encoders && !rangeF && !rangeS && !bumpers && !us) return false;
   else return true;
 }
 
