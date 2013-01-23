@@ -42,6 +42,7 @@ typedef struct {
   sensors sensors[5];
   int index;
   bool empty;
+  bool wall;
 } logs;
 
 extern sensors DEFAULT_SENSORS;

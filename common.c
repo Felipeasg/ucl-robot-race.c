@@ -101,6 +101,16 @@ void changeVelocity (int fromVL, int fromVR, int toVL, int toVR, sensors* toBeIn
     printf("changeVelocity final from %d:%d and encoders: %d:%d\n", toVL, toVR, current.encodersL, current.encodersR);
 }
 
+void sensorsDifference(sensors* last, sensors* prev, sensors* new) {
+  new->encodersL = last->encodersL - prev->encodersL;
+  new->encodersR = last->encodersR - prev->encodersR;
+  new->rangeSL = last->rangeSL - prev->rangeSL;
+  new->rangeSR = last->rangeSR - prev->rangeSR;
+  new->rangeFL = last->rangeFL - prev->rangeFL;
+  new->rangeFR = last->rangeFR - prev->rangeFR;
+  new->us = last->us - prev->us;
+}
+
 void sensorsGetOneStep(sensors* Sensors, sensors* New, int steps) {
 
   // TODO use sensorsSet instead
@@ -110,6 +120,7 @@ void sensorsGetOneStep(sensors* Sensors, sensors* New, int steps) {
   if (Sensors->rangeSR != 0) New->rangeSR = Sensors->rangeSR/steps;
   if (Sensors->rangeFL != 0) New->rangeFL = Sensors->rangeFL/steps;
   if (Sensors->rangeFR != 0) New->rangeFR = Sensors->rangeFR/steps;
+  if (Sensors->us != 0) New->us = Sensors->us/steps;
 }
 
 void constAcceleration (int initialVL, int initialVR, int finalVL, int finalVR, sensors* toBe, int steps) {

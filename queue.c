@@ -8,7 +8,7 @@
 #include <string.h>
 #include "common.h"
 
-void addLog(sensors* s, logs* l) {
+void logsAdd(sensors* s, logs* l) {
   if (++(l->index) > 4 ) {
     if (l->empty == true) l->empty = false;
     l->index = 0;
@@ -16,3 +16,8 @@ void addLog(sensors* s, logs* l) {
   memcpy(&l->sensors[l->index], s, sizeof(sensors));
   printf("index %i count %d eg: %i \n", l->index, l->empty,  l->sensors[l->index].us);
 }
+
+void logsLastDifference(logs* l, sensors* New) {
+  sensorsDifference(&l->sensors[l->index], &l->sensors[l->index-1], New);
+}
+

@@ -17,8 +17,6 @@
 
 #include "common.h"
 
-// global vars holdin velocity
-
 // void reposition(bool minCase, bool maxCase, current, initial, toBeMin, toBeMax) {
 //   while (1) {
 //     minCase = !sensorsToBe(current, initial, toBeMin);
@@ -167,8 +165,7 @@ int main () {
     usGet(&r.s);
     rangeFGet(&r.s);
     rangeSGet(&r.s);
-    addLog(&r.s, &l);
-    
+    logsAdd(&r.s, &l);
 
     if (!shouldReposition(&r)) {
       move(&r.v);
