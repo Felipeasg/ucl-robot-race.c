@@ -40,6 +40,8 @@ volts DEFAULT_VOLTS = {
   .r = 0
 };
 
+logs l = {.index = -1, .empty = true};
+
 int sock = -1;
 
 int abs (int value) {

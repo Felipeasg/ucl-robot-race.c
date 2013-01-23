@@ -154,10 +154,6 @@ int shouldReposition(robot* r) {
 
 int main () {
   initSocket();
-  
-  logs l;
-  l.index = -1;
-  l.empty = true;
   robot r = {.s= DEFAULT_SENSORS, .v= (volts){r: 20, l: 20}};
 
   while (1) {
@@ -165,7 +161,7 @@ int main () {
     usGet(&r.s);
     rangeFGet(&r.s);
     rangeSGet(&r.s);
-    logsAdd(&r.s, &l);
+    logsAdd(&r.s);
 
     if (!shouldReposition(&r)) {
       move(&r.v);
