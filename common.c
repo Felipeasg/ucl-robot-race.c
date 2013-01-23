@@ -173,6 +173,7 @@ int initSocket() {
   struct sockaddr_in s_addr;
 
   if (sock != -1) {
+    printf("Sock is already open\n");
     close(sock);
     sock = -1;
   }
@@ -183,6 +184,7 @@ int initSocket() {
   }
   
   while (1) {
+    printf("Sock is in while\n");
     s_addr.sin_family = AF_INET;
     s_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     s_addr.sin_port = htons(55443);
@@ -191,7 +193,6 @@ int initSocket() {
       /* connection succeeded */
       printf("Connection succeeded\n");
       return sock;
-      return;
     }
     sleep(1);
     printf(".");
