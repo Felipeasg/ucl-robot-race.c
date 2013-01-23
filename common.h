@@ -49,6 +49,7 @@ extern sensors DEFAULT_SENSORS;
 extern status DEFAULT_STATUS;
 extern volts DEFAULT_VOLTS;
 extern logs l;
+extern int sock;
 
 
 int abs (int);
@@ -65,8 +66,6 @@ void moveStraightAtVoltage(int);
 
 void turnOnSpotAtVoltage(int);
 
-bool sensorToBe(int, int, int);
-bool sensorsToBe(sensors*, sensors*, sensors*);
 void stopMovement();
 
 #endif
