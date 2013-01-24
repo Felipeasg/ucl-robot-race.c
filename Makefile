@@ -1,6 +1,10 @@
 hellomake: main.c sensors/*.c common.c
 	@gcc -g -o go main.c sensors/*.c common.c -I.
 
+sensors: getSensors.c sensors/*.c common.c
+	@gcc -g -o go getSensors.c sensors/*.c common.c -I.
+
+
 task12: task1.2.c sensors/*.c common.c
 	@gcc -g -o task12 task1.2.c sensors/*.c common.c -I.
 
