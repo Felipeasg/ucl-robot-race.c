@@ -11,6 +11,7 @@
 #include "sensors/bumpers.h"
 #include "sensors/rangefinders.h"
 #include "sensors/us.h"
+#include "ai/risk.h"
 
 
 #define WHEELREVOLUTION 100 * 3.14159
@@ -54,7 +55,8 @@ robot r = {
     .us = 0
   },
   .v = (volts){r: 20, l: 20},
-  .rangeAngles = (volts){r:45,l:45}
+  .rangeAngles = (volts){r:45,l:45},
+  .l = (logs){.index = -1, .empty = true, .wall=-1}
 };
 
 int abs (int value) {
@@ -418,6 +420,18 @@ void moveStraightAtVoltage(int voltage) {
 }
 /* Level abstraction: 1 end */
 
+void logsLastDifference(logs* l, sensors* New) {
+  sensorsDifference(&l->sensors[l->index], &l->sensors[l->index-1], New);
+}
+
+void addLog(sensors* s, logs* l) {
+  if (++(l->index) > 4 ) {
+    if (l->empty == true) l->empty = false;
+    l->index = 0;
+  }
+  memcpy(&l->sensors[l->index], s, sizeof(sensors));
+  //printf("index %i eg: %i \n", l->index, l->sensors[l->index].us);
+}
 
 // TODO
 // turn very slowly

@@ -159,19 +159,6 @@ void sensorsDifference(sensors* last, sensors* prev, sensors* new) {
   new->us = last->us - prev->us;
 }
 
-void logsLastDifference(logs* l, sensors* New) {
-  sensorsDifference(&l->sensors[l->index], &l->sensors[l->index-1], New);
-}
-
-void addLog(sensors* s, logs* l) {
-  if (++(l->index) > 4 ) {
-    if (l->empty == true) l->empty = false;
-    l->index = 0;
-  }
-  memcpy(&l->sensors[l->index], s, sizeof(sensors));
-  //printf("index %i eg: %i \n", l->index, l->sensors[l->index].us);
-}
-
 int main () {
   initSocket();
 
@@ -228,9 +215,6 @@ int main () {
   status rangeFRStatus = DEFAULT_STATUS;
   status rangeSLStatus = DEFAULT_STATUS;
   status rangeSRStatus = DEFAULT_STATUS;
-  logs l;
-  l.index = -1;
-  l.empty = true;
   
   int decision = 0;
 
@@ -239,7 +223,7 @@ int main () {
     usGet(&r.s);
     rangeFGet(&r.s);
     rangeSGet(&r.s);
-    addLog(&r.s, &l);
+    addLog(&r.s, &r.l);
     
     // decision = shouldReposition(&r);
     // 

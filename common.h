@@ -34,17 +34,18 @@ typedef struct {
 } volts;
 
 typedef struct {
-  sensors s;
-  volts v;
-  volts rangeAngles;
-} robot;
-
-typedef struct {
   sensors sensors[5];
   int index;
   bool empty;
-  bool wall;
+  int wall;
 } logs;
+
+typedef struct {
+  sensors s;
+  volts v;
+  volts rangeAngles;
+  logs l;
+} robot;
 
 extern sensors DEFAULT_SENSORS;
 extern status DEFAULT_STATUS;
