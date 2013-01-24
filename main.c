@@ -82,66 +82,85 @@ int shouldReposition(robot* r) {
   printf("PARSE sl%i sr%i fl%i fr%i us%i\n", s->rangeSL, s->rangeSR, s->rangeFL, s->rangeFR, s->us);
 
   if (s->us <= 100) {
-    if (s->rangeFL < 100) {
+    if (s->rangeFL < 92) {
       fflush(stdout);
       printf("close US, reposition FL\n");
-      reposition(r, 30, 15, 30, 15);
+      reposition(r, 20, 10, 20, 10);
       return 1;
-    } else if (s->rangeFR < 100) {
+    } else if (s->rangeFR < 92) {
       fflush(stdout);
       printf("close US, reposition FR\n");
-      reposition(r, 15, 30, 15, 30);
+      reposition(r, 10, 20, 10, 20);
       return 1;
     }
-    return 0;
-  }
-  
-  // If rangeFL/FR in range or rangeSL/SR in range
-  if (s->rangeFL <= RANGEFL || s->rangeFR <= RANGEFR ) {decision.straight = true;}
-  if (s->rangeSL <= RANGESL || s->rangeSR <= RANGESR ) {decision.straight = true;}
-  if (decision.straight == true) {
-    fflush(stdout);
-    printf("we can go straight\n");
     return 0;
   }
   
   // TODO track previous position of SL SR and turn when it is not touching
 
 
-    
-    if (s->rangeFL >= 85) {
-      if (s->rangeFR == 100 && s->rangeSR == 40) {
-        fflush(stdout);
-         printf("FL pivot\n");
-         reposition(r, 15, 30, 15, 30);
-         return 1;
-      }
-    }
-    
-    if (s->rangeFR >= 85) {
-      if (s->rangeFR == 100 && s->rangeSR == 40) {
-        fflush(stdout);
-         printf("FR pivot\n");
-         reposition(r, 15, 30, 15, 30);
-         return 1;
-      }
-    }
-
     // LeftS pivot - Right is empty && SL is touching
-    if (s->rangeFR == 100 && s->rangeSR == 40 && s->rangeSL < 40 ) {
+    if (s->rangeFR == 92 && s->rangeSR == 38 && s->rangeFL == 92 && s->rangeSL < 38 ) {
       fflush(stdout);
       printf("SL pivot\n");
-      reposition(r, 15, 30, 15, 30);
+      reposition(r, 10, 20, 10, 20);
       return 1;
     }
 
 
     // Right pivot - Left is empty && SR is touching
-    if (s->rangeFL == 100 && s->rangeSL == 40 && s->rangeSR < 40 ) {
+    if (s->rangeFL == 92 && s->rangeSL == 38 && s->rangeSR < 38 ) {
       fflush(stdout);
       printf("SR pivot\n");
-      reposition(r, 30, 15, 30, 15);
+      reposition(r, 13, 10, 13, 10);
       return 1;
+    }
+
+    
+    if (s->rangeFL >= 77) {
+      if (s->rangeFR == 92 && s->rangeSR == 38) {
+        
+        
+        if (s->rangeFL <= RANGEFL || s->rangeFR <= RANGEFR ) {decision.straight = true;}
+        if (s->rangeSL <= RANGESL || s->rangeSR <= RANGESR ) {decision.straight = true;}
+        if (decision.straight == true) {
+          fflush(stdout);
+          printf("we can go straight2\n");
+          return 0;
+        }
+        
+        
+        fflush(stdout);
+         printf("FL pivot\n");
+         reposition(r, 10, 20, 10, 20);
+         return 1;
+      }
+    }
+    
+    if (s->rangeFR >= 77) {
+      if (s->rangeFL == 92 && s->rangeSL == 38) {
+        
+        if (s->rangeFL <= RANGEFL || s->rangeFR <= RANGEFR ) {decision.straight = true;}
+        if (s->rangeSL <= RANGESL || s->rangeSR <= RANGESR ) {decision.straight = true;}
+        if (decision.straight == true) {
+          fflush(stdout);
+          printf("we can go straight1\n");
+          return 0;
+        }
+        fflush(stdout);
+         printf("FR pivot\n");
+         reposition(r, 20, 10, 20, 10);
+         return 1;
+      }
+    }
+    
+    // If rangeFL/FR in range or rangeSL/SR in range
+    if (s->rangeFL <= RANGEFL || s->rangeFR <= RANGEFR ) {decision.straight = true;}
+    if (s->rangeSL <= RANGESL || s->rangeSR <= RANGESR ) {decision.straight = true;}
+    if (decision.straight == true) {
+      fflush(stdout);
+      printf("we can go straight\n");
+      return 0;
     }
 
     
@@ -225,12 +244,12 @@ int main () {
     rangeSGet(&r.s);
     addLog(&r.s, &r.l);
     
-    // decision = shouldReposition(&r);
-    // 
-    // if (!decision) {
-    //   move(&r.v);
-    // }
-    printf("{us: %i,rangeSL: %i,rangeSR: %i,rangeFL: %i,rangeFR: %i, rangeFLSide: %i,rangeFRSide: %i,rangeFLFront: %i,rangeFRFront: %i},\n",r.s.us,r.s.rangeSL,r.s.rangeSR,r.s.rangeFL,r.s.rangeFR,rangeFLSideDistance(r.s.rangeFL),rangeFRSideDistance(r.s.rangeFR),rangeFLFrontDistance(r.s.rangeFL),rangeFRFrontDistance(r.s.rangeFR));
+    decision = shouldReposition(&r);
+    
+    if (!decision) {
+      move(&r.v);
+    }
+    printf("{us: %i,rangeSL: %i,rangeSR: %i,rangeFL: %i,rangeFR: %i, rangeFLSide: %i,rangeFRSide: %i,rangeFLFront: %i,rangeFRFront: %i},\n",r.s.us,r.s.rangeSL,r.s.rangeSR,r.s.rangeFL,r.s.rangeFR,rangeFLSide(r.s.rangeFL),rangeFRSide(r.s.rangeFR),rangeFLFront(r.s.rangeFL),rangeFRFront(r.s.rangeFR));
   }
 
   return 0;

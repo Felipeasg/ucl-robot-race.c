@@ -32,7 +32,7 @@ int usParse(char* elaborated[], sensors* Sensors) {
   if (elaborated[2] == NULL ||
       !strcmp(elaborated[2],"") ) return 1;
 
-  usSet(Sensors, atoi(elaborated[2]));
+  usSet(Sensors, atoi(elaborated[2])-8);
   // it should be 0 for failure, 1 for silent, 2 for OK
   return 2;
 }

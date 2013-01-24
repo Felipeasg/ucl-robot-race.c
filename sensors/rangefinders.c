@@ -33,16 +33,16 @@ int rangeFOffsetAtAngle(int angle) {
   if (angle == 45) return 8;
 }
 
-int rangeFLSideDistance(int distance) {
+int rangeFLSide(int distance) {
   return cos(r.rangeAngles.l)*distance;
 };
-int rangeFRSideDistance(int distance) {
+int rangeFRSide(int distance) {
   return cos(r.rangeAngles.r)*distance;
 };
-int rangeFLFrontDistance(int distance){
+int rangeFLFront(int distance){
   return sin(r.rangeAngles.l)*distance;
 };
-int rangeFRFrontDistance(int distance){
+int rangeFRFront(int distance){
   return sin(r.rangeAngles.r)*distance;
 };
 

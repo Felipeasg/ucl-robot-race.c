@@ -8,15 +8,6 @@
 #include <string.h>
 #include "common.h"
 
-
-
 void checkRisks() {
-  // Frontal hit risk
-  
-  // Straight
-
-  // Leftish Rightish
-  
-  // Backwards
 }
 
