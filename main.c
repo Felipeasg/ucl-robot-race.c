@@ -169,7 +169,7 @@ void addLog(sensors* s, logs* l) {
     l->index = 0;
   }
   memcpy(&l->sensors[l->index], s, sizeof(sensors));
-  printf("index %i eg: %i \n", l->index, l->sensors[l->index].us);
+  //printf("index %i eg: %i \n", l->index, l->sensors[l->index].us);
 }
 
 int main () {
@@ -221,7 +221,6 @@ int main () {
   //   // reposition(minCase, maxCase);
   // }
   
-  robot r = {.s= DEFAULT_SENSORS, .v= (volts){r: 20, l: 20}};
   sensors limits = DEFAULT_SENSORS;
   
   status usStatus = DEFAULT_STATUS;
@@ -247,7 +246,7 @@ int main () {
     // if (!decision) {
     //   move(&r.v);
     // }
-    printf("{us: %i,rangeSL: %i,rangeSR: %i,rangeFL: %i,rangeFR: %i}",r.s.us,r.s.rangeSL,r.s.rangeSR,r.s.rangeFL,r.s.rangeFR);
+    printf("{us: %i,rangeSL: %i,rangeSR: %i,rangeFL: %i,rangeFR: %i, rangeFLSide: %i,rangeFRSide: %i,rangeFLFront: %i,rangeFRFront: %i},\n",r.s.us,r.s.rangeSL,r.s.rangeSR,r.s.rangeFL,r.s.rangeFR,rangeFLSideDistance(r.s.rangeFL),rangeFRSideDistance(r.s.rangeFR),rangeFLFrontDistance(r.s.rangeFL),rangeFRFrontDistance(r.s.rangeFR));
   }
 
   return 0;

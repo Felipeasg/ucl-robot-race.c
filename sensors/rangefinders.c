@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <math.h>
 #include "../common.h"
 
 
@@ -28,11 +29,28 @@ void rangeFSet(sensors* Sensors, int l, int r) {
   Sensors->rangeFR = r;
 }
 
+int rangeFOffsetAtAngle(int angle) {
+  if (angle == 45) return 8;
+}
+
+int rangeFLSideDistance(int distance) {
+  return cos(r.rangeAngles.l)*distance;
+};
+int rangeFRSideDistance(int distance) {
+  return cos(r.rangeAngles.r)*distance;
+};
+int rangeFLFrontDistance(int distance){
+  return sin(r.rangeAngles.l)*distance;
+};
+int rangeFRFrontDistance(int distance){
+  return sin(r.rangeAngles.r)*distance;
+};
+
 int rangeFParse(char* elaborated[], sensors* Sensors) {
   if (elaborated[2] == NULL || elaborated[3] == NULL ||
       !strcmp(elaborated[2],"") || !strcmp(elaborated[3],"") ) return 1;
 
-  rangeFSet(Sensors, gp2d12_ir_to_dist(atoi(elaborated[2])), gp2d12_ir_to_dist(atoi(elaborated[3])) );
+  rangeFSet(Sensors, gp2d12_ir_to_dist(atoi(elaborated[2]))-rangeFOffsetAtAngle(r.rangeAngles.l), gp2d12_ir_to_dist(atoi(elaborated[3]))-rangeFOffsetAtAngle(r.rangeAngles.r) );
   // it should be 0 for failure, 1 for silent, 2 for OK
   return 2;
 }
@@ -79,7 +97,7 @@ int rangeSParse(char* elaborated[], sensors* Sensors) {
     if (elaborated[2] == NULL || elaborated[3] == NULL ||
         !strcmp(elaborated[2],"") || !strcmp(elaborated[3],"") ) return 1;
     
-    rangeSSet(Sensors, gp2d120_ir_to_dist(atoi(elaborated[2])), gp2d120_ir_to_dist(atoi(elaborated[3])));
+    rangeSSet(Sensors, gp2d120_ir_to_dist(atoi(elaborated[2]))-2, gp2d120_ir_to_dist(atoi(elaborated[3]))-2);
     // it should be 0 for failure, 1 for silent, 2 for OK
     return 2;
 }

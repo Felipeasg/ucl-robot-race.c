@@ -41,6 +41,22 @@ volts DEFAULT_VOLTS = {
 
 int sock = -1;
 
+robot r = {
+  .s = {
+    .encodersL = 0,
+    .encodersR = 0,
+    .bumpersL = 0,
+    .bumpersR = 0,
+    .rangeFL = 0,
+    .rangeFR = 0,
+    .rangeSL = 0,
+    .rangeSR = 0,
+    .us = 0
+  },
+  .v = (volts){r: 20, l: 20},
+  .rangeAngles = (volts){r:45,l:45}
+};
+
 int abs (int value) {
 
   if (value < 0) return -value;

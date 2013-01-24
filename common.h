@@ -36,6 +36,7 @@ typedef struct {
 typedef struct {
   sensors s;
   volts v;
+  volts rangeAngles;
 } robot;
 
 typedef struct {
@@ -48,6 +49,7 @@ typedef struct {
 extern sensors DEFAULT_SENSORS;
 extern status DEFAULT_STATUS;
 extern volts DEFAULT_VOLTS;
+extern robot r;
 
 
 int abs (int);
