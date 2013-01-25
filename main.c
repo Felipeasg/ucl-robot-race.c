@@ -10,11 +10,38 @@
 #include <math.h>
 #include "common.h"
 #include "robot.h"
+#include "rangefinders.h"
+
+#define ACCURATE true
+#define INACCURATE false
+
+double min(double one, double two) {
+  return (one < two) ? one : two;
+}
+
+double checkFront(bool accurate) {
+  bool rangesAreEqual, rangesAreInfinite, rangeLInfinite, rangeRInfinite;
+  moveILR(60,-60);
+  rangeFGet(&r.s);
+  rangesAreEqual = (r.s.rangeFL - r.s.rangeFL) <= 5 ? true : false;
+  rangeLInfinite = r.s.rangeFL == 92 ? true : false;
+  rangeRInfinite = r.s.rangeFR == 92 ? true : false;
+  rangesAreInfinite = rangeLInfinite == true && rangeRInfinite == true ? true : false;
+  
+  if (rangesAreEqual && rangesAreInfinite && !accurate) return 92;
+  else if (rangesAreEqual && !rangesAreInfinite) return rangeFRFront(r.s.rangeFR);
+  else if (!rangesAreEqual && !accurate) return min(rangeFLFront(r.s.rangeFL),rangeFRFront(r.s.rangeFR));
+  
+  usGet(&r.s);
+  return min(r.s.us, min(rangeFLFront(r.s.rangeFL),rangeFRFront(r.s.rangeFR)));
+}
 
 int main () {
   initSocket();
   encodersReset();
-  int count, speed;
+  int count, speed = 0, i;
+  double toTravel, toTravelL, toTravelR, newTravel, tempTravel;
+  toTravelL = toTravelR = newTravel = tempTravel = -1;
   sensors initial = DEFAULT_SENSORS;
   
 
@@ -22,39 +49,38 @@ int main () {
     // printf("Expected: %lF and slides %lF,%i, %lf, %lf\n", count * 30* 0.156, slideE(0,30), 30, T2CM, 30/T2CM);
 
   while(1) {
+    cTrail();
     memcpy(&initial, &r.s, sizeof(sensors));
     encodersGet(&r.s);
-    usGet(&r.s);
+    toTravel = checkFront(ACCURATE)/T2CM;
+    rangeSGet(&r.s);
+    fflush(stdout);
+    printf(KRED "I can travel %i (%lF encoders)\n"KNRM,r.s.us, toTravel/T2CM);
     
-    // rangeFGet(&r.s); addLog(&r.s, &r.l);
-    // moveILR(45, 45);
-    // rangeFGet(&r.s); addLog(&r.s, &r.l);
-    // moveILR(0, 0);
-    // rangeFGet(&r.s); addLog(&r.s, &r.l);
-    // moveILR(-45, -45);
-    // rangeSGet(&r.s); addLog(&r.s, &r.l);
-    int i;
-    for (i=0; i < 21; i++) {
-      r.s.rangeFL = i;
-      addLog(&r.s, &r.l);
+    for (i=1; i<10; i++) {
+      rangeFGet(&r.s); addLog(&r.s, &r.l); moveILR(-45+i*10, 45-i*10);
+      double rFRS = rangeFRSide(r.s.rangeFR); double rFLS = rangeFLSide(r.s.rangeFL);
+      double rFRF = rangeFRFront(r.s.rangeFR); double rFLF = rangeFLFront(r.s.rangeFL);
+      
     }
+
     
     printLogs(&r.l);
 
     count = 0;
-    while (sensorToBe(r.s.encodersL, initial.encodersL, r.s.us/T2CM)) {
+    r.v.l = 30;
+    r.v.r = 30;
+    volts currentV = {r.v.l,r.v.r};
+    while (sensorToBe(r.s.encodersL, initial.encodersL, toTravel)) {
+      toTravel -= slideE(currentV.r, r.v.l+speed);
+      toTravelR -= slideE(currentV.r, r.v.r-speed);
+      currentV.l = r.v.l + speed;
+      currentV.r = r.v.r - speed;
       moveAtVoltage(30, 30);
-
       rangeFGet(&r.s);
-      moveILR(45, 45);
-      rangeFGet(&r.s);
-      moveILR(0, 0);
-      rangeFGet(&r.s);
-      moveILR(-45, -45);
-      rangeSGet(&r.s);
-
       encodersGet(&r.s);
-      printf("Actual: %i and %i %lF\n", r.s.encodersL-initial.encodersL, count, (double)500/(r.s.encodersL-initial.encodersL));
+      addLog(&r.s, &r.l);
+      printf("Actual: %i and %i %lF (%lF)\n", r.s.encodersL-initial.encodersL, count, (double)500/(r.s.encodersL-initial.encodersL), toTravel);
       count++;
     }
   }

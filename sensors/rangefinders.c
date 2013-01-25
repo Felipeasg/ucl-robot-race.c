@@ -8,6 +8,7 @@
 #include <string.h>
 #include <math.h>
 #include "common.h"
+#include "rangefinders.h"
 
 bool moveIR (int angle) {
   if (angle > 90 || angle < -90) return false;
@@ -15,7 +16,8 @@ bool moveIR (int angle) {
   #ifdef DEBUG
   printf("I R %i\n", angle);
   #endif
-  nextCmd();
+  nextCmd(); // TODO parseCmd
+  r.s.rangeFRAngle = angle;
   return true;
 }
 
@@ -26,6 +28,7 @@ int moveIL (int angle) {
   printf("I L %i\n", angle);
   #endif
   nextCmd();
+  r.s.rangeFLAngle = angle;
   return true;
 }
 
@@ -37,6 +40,8 @@ int moveILR (int angle1, int angle2) {
   printf(buf, "I LR %i %i\n", angle1, angle2);
   #endif
   nextCmd();
+  r.s.rangeFLAngle = angle1;
+  r.s.rangeFRAngle = angle2;
   return true;
 }
 
@@ -52,34 +57,35 @@ void rangeFGet(sensors* Sensors) {
   char* elaborated[80];
   rangeFCmd();
   parseCmd(buf, elaborated, SIFLR, Sensors);
-}
+};
 
 void rangeFSet(sensors* Sensors, int l, int r) {
   Sensors->rangeFL = l;
   Sensors->rangeFR = r;
-}
+};
 
-int rangeFLSide(int distance) {
-  return cos(r.rangeAngles.l)*distance;
+double rangeFLSide(double distance) {
+  return absDouble(cos((r.s.rangeFLAngle+45)*M_PI/80)*distance);
 };
-int rangeFRSide(int distance) {
-  return cos(r.rangeAngles.r)*distance;
+
+double rangeFRSide(double distance) {
+  return absDouble(cos((r.s.rangeFRAngle-45)*M_PI/80)*distance);
 };
-int rangeFLFront(int distance){
-  return sin(r.rangeAngles.l)*distance;
+double rangeFLFront(double distance){
+  return absDouble(sin((r.s.rangeFLAngle+45)*M_PI/80)*distance);
 };
-int rangeFRFront(int distance){
-  return sin(r.rangeAngles.r)*distance;
+double rangeFRFront(double distance){
+  return absDouble(sin((r.s.rangeFRAngle-45)*M_PI/80)*distance);
 };
 
 int rangeFParse(char* elaborated[], sensors* Sensors) {
   if (elaborated[2] == NULL || elaborated[3] == NULL ||
       !strcmp(elaborated[2],"") || !strcmp(elaborated[3],"") ) return 1;
 
-  rangeFSet(Sensors, gp2d12_ir_to_dist(atoi(elaborated[2]))-range_angle_offset(r.rangeAngles.l), gp2d12_ir_to_dist(atoi(elaborated[3]))-range_angle_offset(r.rangeAngles.r) );
+  rangeFSet(Sensors, gp2d12_ir_to_dist(atoi(elaborated[2]))-range_angle_offset(r.s.rangeFLAngle), gp2d12_ir_to_dist(atoi(elaborated[3]))-range_angle_offset(r.s.rangeFRAngle) );
   // it should be 0 for failure, 1 for silent, 2 for OK
   return 2;
-}
+};
 
 /* encodersToBe
 // return true when is not yet toBe, return false when it goes over toBe

@@ -1,20 +1,35 @@
 #ifndef RANGEFINDERS_INCLUDED
 #define RANGEFINDERS_INCLUDED
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdbool.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <math.h>
+#include "common.h"
+
+bool moveIR (int angle);
+int moveIL (int angle);
+int moveILR (int angle1, int angle2);
 void rangeFCmd();
 void rangeFGet(sensors* Sensors);
-int rangeFParse(char**, sensors*);
-void rangeFSet(sensors*, int, int);
-bool rangeFToBe(sensors*, sensors*, sensors*);
+void rangeFSet(sensors* Sensors, int l, int r);
+double rangeFLSide(double distance);
+double rangeFRSide(double distance);
+double rangeFLFront(double distance);
+double rangeFRFront(double distance);
+int rangeFParse(char* elaborated[], sensors* Sensors);
+bool rangeFToBe(sensors* current, sensors* initial, sensors* toBe);
+
 
 void rangeSCmd();
 void rangeSGet(sensors* Sensors);
-int rangeSParse(char**, sensors*);
-void rangeSSet(sensors*, int, int);
-bool rangeSToBe(sensors*, sensors*, sensors*);
-
-int gp2d120_ir_to_dist(int);
-int gp2d12_ir_to_dist(int);
-int dist_to_gp2d120_ir(int);
+void rangeSSet(sensors* Sensors, int l, int r);
+int rangeSParse(char* elaborated[], sensors* Sensors);
+bool rangeSToBe(sensors* current, sensors* initial, sensors* toBe);
 
 #endif

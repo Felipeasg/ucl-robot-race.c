@@ -7,6 +7,10 @@
 #define SISLR 4
 #define SUS 5
 
+#define KRED  "\x1B[31m"
+#define KNRM  "\x1B[0m"
+#define KGRN  "\x1B[32m"
+
 
 char buf[80];
 
@@ -17,6 +21,8 @@ typedef struct {
   int bumpersR;
   int rangeFL;
   int rangeFR;
+  int rangeFLAngle;
+  int rangeFRAngle;
   int rangeSL;
   int rangeSR;
   int us;
@@ -41,9 +47,15 @@ typedef struct {
 } logs;
 
 typedef struct {
+  sensors* sensors[20];
+  int index;
+  bool empty;
+  int wall;
+  } ptrLogs;
+
+typedef struct {
   sensors s;
   volts v;
-  volts rangeAngles;
   logs l;
 } robot;
 
@@ -54,6 +66,7 @@ extern robot r;
 
 
 int abs (int);
+double absDouble(double i);
 void constAcceleration (int, int, int, int, sensors*, int);
 
 int getProportion(int, int);
@@ -71,6 +84,8 @@ bool sensorToBe(int, int, int);
 bool sensorsToBe(sensors*, sensors*, sensors*);
 void stopMovement();
 
+
+void cTrail();
 #endif
 
 

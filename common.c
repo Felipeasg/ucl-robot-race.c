@@ -19,6 +19,8 @@ sensors DEFAULT_SENSORS = {
   .bumpersR = 0,
   .rangeFL = 0,
   .rangeFR = 0,
+  .rangeFLAngle = 0,
+  .rangeFRAngle = 0,
   .rangeSL = 0,
   .rangeSR = 0,
   .us = 0
@@ -50,9 +52,13 @@ robot r = {
     .us = 0
   },
   .v = (volts){r: 20, l: 20},
-  .rangeAngles = (volts){r:45,l:45},
   .l = (logs){.index = -1, .empty = true, .wall=-1}
 };
+
+double absDouble(double i) {
+  if (i<0) return -i;
+  return i;
+}
 
 bool inLimit(int voltage) { if (voltage <= 127 && voltage >= -127) return true; else return false; }
 
@@ -369,6 +375,14 @@ void moveAtVoltage(int voltage1, int voltage2) {
   nextCmd();
 }
 
+void cTrail() {
+  sprintf(buf, "C TRAIL\n");
+  #ifdef DEBUG
+  printf("C TRAIL\n");
+  #endif
+  nextCmd();
+}
+
 void move(volts* v) {
   moveAtVoltage(v->l, v->r);
 }
@@ -420,7 +434,7 @@ void printLogs(logs* l) {
   int i;
   int current = (l->empty == true) ? 0 : l->index+1;
   for (i=0; i < 20; i++) {
-    printf("Log %i at index %i range: %i\n", i, current, l->sensors[current].rangeFL);
+    printf("Log %i at index %i range: %i at angle: %i\n", i, current, l->sensors[current].rangeFL, l->sensors[current].rangeFLAngle);
     if (l->empty == true && current == l->index) break;
     if (l->empty == false && current == 19) current = -1;
     current++;

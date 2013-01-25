@@ -4,8 +4,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include <math.h>
-#include "robot.h"
 #include "common.h"
+#include "robot.h"
 
 double slideE(int m, int n) {
   m = m/10; printf("%i\n",m);
