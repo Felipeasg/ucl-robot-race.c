@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include "model/robot.h"
 #include "common.h"
 #include "sensors/encoders.h"
 #include "sensors/bumpers.h"
@@ -15,7 +16,6 @@
 
 
 #define WHEELREVOLUTION 100 * 3.14159
-#define WHEELDISTANCE 240
 
 sensors DEFAULT_SENSORS = {
   .encodersL = 0,
@@ -60,41 +60,25 @@ robot r = {
 };
 
 int abs (int value) {
-
   if (value < 0) return -value;
   return value;
 }
 
 int getProportion(int number, int proportion) {
-
   return (proportion/100)*number;
-}
-
-float getSlide(int m, int n) {
-  float series1, series2;
-
-  m = m/10;
-  //printf("%i\n",m);
-  n = n/10;
-  // printf("%i\n",n);
-  series1 = ((float)m/2)*(10+(float)m*10)/20;
-  // printf("%f\n",series1);
-  series2 = ((float)n/2)*(10+(float)n*10)/20;
-  // printf("%f\n",series2);
-  return abs(series2-series1);
 }
 
 
 void considerSlide(int fromVL, int fromVR, int toVL, int toVR, sensors* Sensors) {
-  int slideVL = getSlide(fromVL, toVL);
-  int slideVR = getSlide(fromVR, toVR);
+  int slideVL = slideE(fromVL, toVL);
+  int slideVR = slideE(fromVR, toVR);
 
   Sensors->encodersL -= slideVL;
   Sensors->encodersR -= slideVR;
 }
 
 void changeVelocity (int fromVL, int fromVR, int toVL, int toVR, sensors* toBeInitial, sensors* toBeFinal) { //TODO pass left and right
-  sensors current = DEFAULT_SENSORS; // should be global
+  sensors current = DEFAULT_SENSORS;
   sensors initial = DEFAULT_SENSORS;
 
   encodersGet(&current); //TODO they must be equal!
@@ -167,7 +151,6 @@ void constAcceleration (int initialVL, int initialVR, int finalVL, int finalVR, 
       if (newVL-stepVL >= finalVL) initialVL -= stepVL;
       if (newVR-stepVL >= finalVR) initialVR -= stepVR;
     }
-    
     // TODO implement NEXT so that consider slide is more accurate
 
     printf("%d-%d, %d-%d\n", finalVL, finalVR, newVL, newVR);
@@ -225,6 +208,16 @@ int initSocket() {
   }
 }
 
+void sensorsDifference(sensors* last, sensors* prev, sensors* new) {
+  new->encodersL = last->encodersL - prev->encodersL;
+  new->encodersR = last->encodersR - prev->encodersR;
+  new->rangeSL = last->rangeSL - prev->rangeSL;
+  new->rangeSR = last->rangeSR - prev->rangeSR;
+  new->rangeFL = last->rangeFL - prev->rangeFL;
+  new->rangeFR = last->rangeFR - prev->rangeFR;
+  new->us = last->us - prev->us;
+}
+
 /*
 void infraOutFront(int infraFrontL, int infraFrontR) {
   stopIf(!inAngle(infraFrontL) || !inAngle(infraFrontR));
@@ -244,16 +237,7 @@ bool inAngle(int angleIR) {
 }
 */
 
-bool inLimit(int voltage) {
-
-  if (voltage <= 127 && voltage >= -127)
-    return true;
-  
-  return false;
-}
-
 void stopIf (bool status) {
-
   if (status) exit(1);
 }
 

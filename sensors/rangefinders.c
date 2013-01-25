@@ -9,6 +9,36 @@
 #include <math.h>
 #include "../common.h"
 
+bool moveIR (int angle) {
+  if (angle > 90 || angle < -90) return false;
+  sprintf(buf, "I R %i\n", angle);
+  #ifdef DEBUG
+  printf("I R %i\n", angle);
+  #endif
+  nextCmd();
+  return true;
+}
+
+int moveIL (int angle) {
+  if (angle > 90 || angle < -90) return false;
+  sprintf(buf, "I L %i\n", angle);
+  #ifdef DEBUG
+  printf("I L %i\n", angle);
+  #endif
+  nextCmd();
+  return true;
+}
+
+int moveILR (int angle1, int angle2) {
+  if (angle1 > 90 || angle2 < -90) return false;
+  if (angle2 > 90 || angle1 < -90) return false;
+  sprintf(buf, "I LR %i %i\n", angle1, angle2);
+  #ifdef DEBUG
+  printf(buf, "I LR %i %i\n", angle1, angle2);
+  #endif
+  nextCmd();
+  return true;
+}
 
 void rangeFCmd() {
   sprintf(buf, "S IFLR\n");
@@ -29,10 +59,6 @@ void rangeFSet(sensors* Sensors, int l, int r) {
   Sensors->rangeFR = r;
 }
 
-int rangeFOffsetAtAngle(int angle) {
-  if (angle == 45) return 8;
-}
-
 int rangeFLSide(int distance) {
   return cos(r.rangeAngles.l)*distance;
 };
@@ -50,7 +76,7 @@ int rangeFParse(char* elaborated[], sensors* Sensors) {
   if (elaborated[2] == NULL || elaborated[3] == NULL ||
       !strcmp(elaborated[2],"") || !strcmp(elaborated[3],"") ) return 1;
 
-  rangeFSet(Sensors, gp2d12_ir_to_dist(atoi(elaborated[2]))-rangeFOffsetAtAngle(r.rangeAngles.l), gp2d12_ir_to_dist(atoi(elaborated[3]))-rangeFOffsetAtAngle(r.rangeAngles.r) );
+  rangeFSet(Sensors, gp2d12_ir_to_dist(atoi(elaborated[2]))-range_angle_offset(r.rangeAngles.l), gp2d12_ir_to_dist(atoi(elaborated[3]))-range_angle_offset(r.rangeAngles.r) );
   // it should be 0 for failure, 1 for silent, 2 for OK
   return 2;
 }
@@ -118,22 +144,4 @@ bool rangeSToBe(sensors* current, sensors* initial, sensors* toBe) {
         return false;
     }
     return true; 
-}
-
-int gp2d120_ir_to_dist(int ir) {		//2 IR sensors on side
-    int dist;
-
-    if (ir >80)
-       dist = (2914 / (ir + 4)) - 1;
-    else dist = 40;
-      return dist;
-}
-
-int gp2d12_ir_to_dist(int ir) {			//2 IR sensors on front
-  int dist;
-
-  if (ir >35)
-     dist = (6787 / (ir - 3)) - 4;
-  else dist = 200;
-    return dist;
 }
