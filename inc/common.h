@@ -34,7 +34,7 @@ typedef struct {
 } volts;
 
 typedef struct {
-  sensors sensors[5];
+  sensors sensors[20];
   int index;
   bool empty;
   int wall;

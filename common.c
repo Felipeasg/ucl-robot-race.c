@@ -6,12 +6,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
-#include "./model/robot.h"
 #include "common.h"
-#include "./sensors/encoders.h"
-#include "./sensors/bumpers.h"
-#include "./sensors/rangefinders.h"
-#include "./sensors/us.h"
 
 
 
@@ -58,6 +53,8 @@ robot r = {
   .rangeAngles = (volts){r:45,l:45},
   .l = (logs){.index = -1, .empty = true, .wall=-1}
 };
+
+bool inLimit(int voltage) { if (voltage <= 127 && voltage >= -127) return true; else return false; }
 
 int abs (int value) {
   if (value < 0) return -value;
@@ -405,11 +402,13 @@ void moveStraightAtVoltage(int voltage) {
 /* Level abstraction: 1 end */
 
 void logsLastDifference(logs* l, sensors* New) {
+  int current = l->index;
+  int previous = (l->index-1 >= 0) ? l->index-1 : 19;
   sensorsDifference(&l->sensors[l->index], &l->sensors[l->index-1], New);
 }
 
 void addLog(sensors* s, logs* l) {
-  if (++(l->index) > 4 ) {
+  if (++(l->index) > 19 ) {
     if (l->empty == true) l->empty = false;
     l->index = 0;
   }
@@ -417,6 +416,17 @@ void addLog(sensors* s, logs* l) {
   //printf("index %i eg: %i \n", l->index, l->sensors[l->index].us);
 }
 
+void printLogs(logs* l) {
+  int i;
+  int current = (l->empty == true) ? 0 : l->index+1;
+  for (i=0; i < 20; i++) {
+    printf("Log %i at index %i range: %i\n", i, current, l->sensors[current].rangeFL);
+    if (l->empty == true && current == l->index) break;
+    if (l->empty == false && current == 19) current = -1;
+    current++;
+    
+  }
+}
 // TODO
 // turn very slowly
 // move as fast as he can.

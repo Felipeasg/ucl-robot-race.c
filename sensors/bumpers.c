@@ -6,7 +6,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
-#include "../common.h"
+#include "common.h"
 
 
 void bumpersCmd() {
