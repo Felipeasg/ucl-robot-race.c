@@ -22,6 +22,7 @@ double min(double one, double two) {
 double checkFront(bool accurate) {
   bool rangesAreEqual, rangesAreInfinite, rangeLInfinite, rangeRInfinite;
   moveILR(60,-60);
+  sleep(1);
   rangeFGet(&r.s);
   rangesAreEqual = (r.s.rangeFL - r.s.rangeFL) <= 5 ? true : false;
   rangeLInfinite = r.s.rangeFL == 92 ? true : false;
