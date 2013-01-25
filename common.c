@@ -6,13 +6,13 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
-#include "model/robot.h"
+#include "./model/robot.h"
 #include "common.h"
-#include "sensors/encoders.h"
-#include "sensors/bumpers.h"
-#include "sensors/rangefinders.h"
-#include "sensors/us.h"
-#include "ai/risk.h"
+#include "./sensors/encoders.h"
+#include "./sensors/bumpers.h"
+#include "./sensors/rangefinders.h"
+#include "./sensors/us.h"
+
 
 
 #define WHEELREVOLUTION 100 * 3.14159

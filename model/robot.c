@@ -1,12 +1,25 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 #include <stdbool.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <string.h>
 #include <math.h>
-#include "common.h"
+#include "../common.h"
 
 #define WHEELDISTANCE 23.65
 #define WHEELDIAMETER 10.5
 #define T2CM (M_PI*WHEELDIAMETER)/360
 
+double slideE(int m, int n) {
+  m = m/10; printf("%i\n",m);
+  n = n/10; printf("%i\n",n);
+  double series1 = ((double)m/2)*(10+(double)m*10)/20; printf("%lF\n",series1);
+  double series2 = ((double)n/2)*(10+(double)n*10)/20; printf("%lF\n",(series2 > series1) ? series2-series1 : series1-series2);
+  return (series2 > series1) ? series2-series1 : series1-series2;
+}
 
 bool inLimit(int voltage) { if (voltage <= 127 && voltage >= -127) return true; else return false; }
 
