@@ -65,17 +65,21 @@ void rangeFSet(sensors* Sensors, int l, int r) {
 };
 
 double rangeFLSide(double distance) {
-  return absDouble(cos((r.s.rangeFLAngle+45)*M_PI/80)*distance);
+  int offset = 0;
+  if (r.s.rangeFLAngle <= -56) offset = 26 - 8*sqrt(2)/2;
+  return absDouble(cos((r.s.rangeFLAngle+45)*M_PI/180)*distance) - offset;
 };
 
 double rangeFRSide(double distance) {
-  return absDouble(cos((r.s.rangeFRAngle-45)*M_PI/80)*distance);
+  int offset = 0;
+  if (r.s.rangeFRAngle <= -56) offset = 26 - 8*sqrt(2)/2;
+  return absDouble(cos((r.s.rangeFRAngle-45)*M_PI/180)*distance) - offset;
 };
 double rangeFLFront(double distance){
-  return absDouble(sin((r.s.rangeFLAngle+45)*M_PI/80)*distance);
+  return absDouble(sin((r.s.rangeFLAngle+45)*M_PI/180)*distance);
 };
 double rangeFRFront(double distance){
-  return absDouble(sin((r.s.rangeFRAngle-45)*M_PI/80)*distance);
+  return absDouble(sin((r.s.rangeFRAngle-45)*M_PI/180)*distance);
 };
 
 int rangeFParse(char* elaborated[], sensors* Sensors) {

@@ -86,6 +86,7 @@ void stopMovement();
 
 
 void cTrail();
+double min(double one, double two);
 #endif
 
 

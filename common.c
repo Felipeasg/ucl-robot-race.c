@@ -55,6 +55,10 @@ robot r = {
   .l = (logs){.index = -1, .empty = true, .wall=-1}
 };
 
+double min(double one, double two) {
+  return (one < two) ? one : two;
+}
+
 double absDouble(double i) {
   if (i<0) return -i;
   return i;

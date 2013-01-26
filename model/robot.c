@@ -28,7 +28,9 @@ double cm_to_ticks(double cm) { return cm / T2CM; }
 double range_side(double angle, double distance) { return cos(angle)*distance;};
 double range_front(double angle, double distance) { return sin(angle)*distance;};
 
-double range_angle_offset(double angle) { return (abs(angle) <= 45) ? 8*cos(angle+45) : 8*sin(angle+45);}
+
+
+double range_angle_offset(double angle) { return (abs(angle) <= 45) ? 8*cos((angle+45)*M_PI/180) : 8*sin((angle+45)*M_PI/180); }
 
 //2 IR sensors on side
 int gp2d120_ir_to_dist(int ir) { return (ir > 80) ? (2914 / (ir + 4)) - 1 : 40; }
