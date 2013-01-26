@@ -15,73 +15,152 @@
 #define ACCURATE true
 #define INACCURATE false
 
-bool rangesAreEqual = false, rangesAreInfinite= false, rangeLInfinite= false, rangeRInfinite= false, isRotatingL= false, isRotatingR = false;
+
+bool
+frontsAreEqual = false,
+frontLInfinite = false,
+frontRInfinite = false,
+frontsAreInfinite = false,
+frontLisCloser = false,
+frontLRisk = false,
+frontRRisk = false,
+
+sidesAreEqual = false,
+sideLInfinite = false,
+sideRInfinite = false,
+sidesAreInfinite = false,
+sideLisCloser = false,
+sideLRisk = false,
+sideRRisk = false,
+
+backLisInfinite = false,
+backRisInfinite = false,
+backsAreInfinite = false,
+backLisCloser = false,
+backLRisk = false,
+backRRisk = false,
+
+isRotatingL = false,
+isRotatingR = false;
 
 double checkFront(bool accurate) {
 
   moveILR(60,-60);
-  sleep(1);
   rangeFGet(&r.s);
-  rangesAreEqual = (r.s.rangeFL - r.s.rangeFL) <= 5 ? true : false;
-  rangeLInfinite = r.s.rangeFL == 100 ? true : false;
-  rangeRInfinite = r.s.rangeFR == 100 ? true : false;
-  rangesAreInfinite = rangeLInfinite == true && rangeRInfinite == true ? true : false;
+  frontsAreEqual = ((r.s.rangeFL - r.s.rangeFL) <= 5);
+  frontLInfinite = (r.s.rangeFL == 100);
+  frontRInfinite = (r.s.rangeFR == 100 );
+  frontsAreInfinite = (frontLInfinite == true && frontRInfinite == true);
+  frontLisCloser = (r.s.rangeFL < r.s.rangeFR);
+  frontLRisk = (r.s.rangeFL < 20);
+  frontRRisk = (r.s.rangeFR < 20);
   
-  if (rangesAreEqual && rangesAreInfinite && !accurate) return 100;
-  else if (rangesAreEqual && !rangesAreInfinite) return rangeFRFront(r.s.rangeFR);
-  else if (!rangesAreEqual && !accurate) return min(rangeFLFront(r.s.rangeFL),rangeFRFront(r.s.rangeFR));
+  if (frontsAreEqual && frontsAreInfinite && !accurate) return 100;
+  else if (frontsAreEqual && !frontsAreInfinite) return rangeFRFront(r.s.rangeFR);
+  else if (!frontsAreEqual && !accurate) return min(rangeFLFront(r.s.rangeFL),rangeFRFront(r.s.rangeFR));
   
   usGet(&r.s);
   return min(r.s.us, min(rangeFLFront(r.s.rangeFL),rangeFRFront(r.s.rangeFR)));
 }
 
-dist checkSide(bool accurate, int i) {
-  dist initial = {.l = -45, .r =45};
+dist checkBack(bool accurate) {
+  rangeSGet(&r.s);
+  dist back = (dist){r.s.rangeSL,r.s.rangeSR};
+  backLisInfinite = (r.s.rangeSL == 38);
+  backRisInfinite = (r.s.rangeSR == 38);
+  backsAreInfinite = (backLisInfinite && backRisInfinite);
+  backLisCloser = (r.s.rangeSL < r.s.rangeSR);
+  backLRisk = (r.s.rangeSL < 20);
+  backRRisk = (r.s.rangeSR < 20);
+  setWall();
+  return back;
+}
+
+dist checkSide(bool accurate, int angleL, int angleR) {
+
+  // dist encodersDiff;
+  // encodersDiff.l =  r.l.sensors[r.l.index].encodersL - r.l.sensors[prevIndex(&r.l)].encodersL;
+  // encodersDiff.r =  r.l.sensors[r.l.index].encodersR - r.l.sensors[prevIndex(&r.l)].encodersR;
+  // double encodersAngle = angle(encodersDiff.l, encodersDiff.r)*180/M_PI;
+  // printf("Encoders angle %lf\n", encodersAngle);
   
-  if (isRotatingL) initial = (dist){.l = -60, .r = 30}; // TODO to be automagically calculated
-  if (isRotatingR) initial = (dist){.l = -30, .r = 60};
+  // if (isRotatingL) initial = (dist){.l = -60, .r = 30}; // TODO to be automagically calculated
+  // if (isRotatingR) initial = (dist){.l = -30, .r = 60};
   
-  sleep(1);
-  rangeFGet(&r.s); addLog(&r.s, &r.l);
-  moveILR(initial.l+i*10, initial.r-i*10);
+  rangeFGet(&r.s); // addLog(&r.s, &r.l);
+  moveILR(angleL, angleR);
   
   // range triangulation
   double rFRS = rangeFRSide(r.s.rangeFR);
   double rFLS = rangeFLSide(r.s.rangeFL);
   double rFRF = rangeFRFront(r.s.rangeFR);
   double rFLF = rangeFLFront(r.s.rangeFL);
-  printf("ANGLE %i rangeFL %i rangeFR %i  rFLS %lF rFRS %lF rFLF %lF rFRF %lF\n" , r.s.rangeFRAngle, r.s.rangeFL, r.s.rangeFR, rFLS, rFRS, rFLF, rFRF);
-  printf("rangeSL %i rangeSR %i\n", r.s.rangeSL, r.s.rangeSR);
+//  printf("ANGLE %i rangeFL %i rangeFR %i  rFLS %lF rFRS %lF rFLF %lF rFRF %lF\n" , r.s.rangeFRAngle, r.s.rangeFL, r.s.rangeFR, rFLS, rFRS, rFLF, rFRF);
+//  printf("rangeSL %i rangeSR %i\n", r.s.rangeSL, r.s.rangeSR);
 
+  sidesAreEqual = ((r.s.rangeFL - r.s.rangeFL) <= 5);
+  sideLInfinite = (r.s.rangeFL == 100);
+  sideRInfinite = (r.s.rangeFR == 100 );
+  sidesAreInfinite = (sideLInfinite == true && sideRInfinite == true);
+  sideLisCloser = (r.s.rangeFL < r.s.rangeFR);
+  sideLRisk = (rangeFLSide(r.s.rangeFL) < 20);
+  sideRRisk = (rangeFRSide(r.s.rangeFR) < 20);
+
+  setWall();
   return (dist){ rangeFLSide(r.s.rangeFL), rangeFRSide(r.s.rangeFR)};
 }
 
 int setWall() {
   if (r.s.wall == 0) r.s.wall = (r.s.rangeSL <= r.s.rangeSR) ? LEFT : RIGHT;
-  printf("\n1wall: %i sl %i sr %i\n\n", r.s.wall, r.s.rangeSL, r.s.rangeSR);
   if (r.s.wall == 0) r.s.wall = (rangeFLSide(r.s.rangeFL) <= rangeFRSide(r.s.rangeFR)) ? LEFT : RIGHT;
-  printf("\n2wall: %i\n\n", r.s.wall);
+}
+
+volts setVoltage(volts speed, dist scale) {
+  volts nextV = {.l = (30 + speed.l) * scale.l, .r = (30 + speed.r) * scale.r };
+  if (nextV.l < nextV.r) { isRotatingL = false; isRotatingR = true; }
+  else if (nextV.l > nextV.r) {isRotatingL = true; isRotatingR = false; }
+  else { isRotatingL = false; isRotatingR = false; }
+  return nextV;
 }
 
 int main () {
   initSocket();
   encodersReset();
-  int scaleVal = 1, i, j;
-  double toTravel, toTravelR;
-  dist toTravelL;
-  sensors initial = DEFAULT_SENSORS;
-  volts speed = {.l=0,.r=0}, scale = {.l=0,.r=0};
-  r.v = (volts){.l=30, .r=30};
+  sensors initial;
+  double toFront;
+  dist toBack;
+  dist toSide;
+  volts speed;
+  dist scale;
 
-  while(1) {  cTrail();
+  while(1) {
+    // This is a new cycle, first check and then move
+    cTrail();
     memcpy(&initial, &r.s, sizeof(sensors));
-    toTravel = checkFront(ACCURATE)/T2CM;
+    moveAtVoltage(r.v.r, r.v.r);
+
+    // Check sensors
+    toFront = checkFront(ACCURATE);
+    toBack = checkBack(ACCURATE);
+    toSide = checkSide(ACCURATE, 0, 0);
+
+    // This gives me the difference between the wheels
+  
+    int dif = 40 - toSide.l;
+    int val = dif;
+    if (val < 5 && val > -5) { val = 0; }
+    if (val < -15) {val = -15; }
+
+    speed = (volts){val,-val};
     
-    sleep(1); rangeSGet(&r.s); setWall();
-    for (j=0; j <5; j++) {
-      toTravelL = checkSide(ACCURATE, j); setWall();
-    }
-    printf("Let's see %lF\n", toTravelL.l);
+    r.v = setVoltage(speed, scale);
+    printf("Speed chosen: %i %i\n", r.v.l, r.v.r );
+
+    // toTravel -= slideE(currentV.r, nextV.l);
+    // toTravelR -= slideE(currentV.r, nextV.r);
+    moveAtVoltage(r.v.l, r.v.r);
+    encodersGet(&r.s); addLog(&r.s, &r.l);
+
 
     // encodersGet(&r.s);
     // rangeSGet(&r.s);
