@@ -40,6 +40,11 @@ typedef struct {
 } volts;
 
 typedef struct {
+  double l;
+  double r;
+} dist;
+
+typedef struct {
   sensors sensors[20];
   int index;
   bool empty;

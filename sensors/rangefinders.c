@@ -86,7 +86,7 @@ int rangeFParse(char* elaborated[], sensors* Sensors) {
   if (elaborated[2] == NULL || elaborated[3] == NULL ||
       !strcmp(elaborated[2],"") || !strcmp(elaborated[3],"") ) return 1;
 
-  rangeFSet(Sensors, gp2d12_ir_to_dist(atoi(elaborated[2]))-range_angle_offset(r.s.rangeFLAngle), gp2d12_ir_to_dist(atoi(elaborated[3]))-range_angle_offset(r.s.rangeFRAngle) );
+  rangeFSet(Sensors, gp2d12_ir_to_dist(atoi(elaborated[2])), gp2d12_ir_to_dist(atoi(elaborated[3])) );
   // it should be 0 for failure, 1 for silent, 2 for OK
   return 2;
 };
