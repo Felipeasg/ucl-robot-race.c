@@ -65,7 +65,6 @@ double checkFront(bool accurate) {
 
 dist checkBack(bool accurate) {
   rangeSGet(&r.s);
-  dist back = (dist){r.s.rangeSL,r.s.rangeSR};
   backLisInfinite = (r.s.rangeSL == 38);
   backRisInfinite = (r.s.rangeSR == 38);
   backsAreInfinite = (backLisInfinite && backRisInfinite);
@@ -73,7 +72,7 @@ dist checkBack(bool accurate) {
   backLRisk = (r.s.rangeSL < 20);
   backRRisk = (r.s.rangeSR < 20);
   setWall();
-  return back;
+  return (dist){r.s.rangeSL,r.s.rangeSR};
 }
 
 dist checkSide(bool accurate, int angleL, int angleR) {
@@ -115,11 +114,25 @@ int setWall() {
   if (r.s.wall == 0) r.s.wall = (rangeFLSide(r.s.rangeFL) <= rangeFRSide(r.s.rangeFR)) ? LEFT : RIGHT;
 }
 
+void considerRotation(int direction) {
+  if (isRotatingL == true && direction == LEFT) properRotation++;
+  else if (isRotatingR == true && direction == RIGHT) properRotation++;
+  else properRotation = 0;
+  
+  if (direction == LEFT) {
+    isRotatingL = true; isRotatingR = false;
+  } else if (direction == RIGHT) {
+    isRotatingL = false; isRotatingR = true;
+  } else {
+    isRotatingL = false; isRotatingR = false;
+  }
+}
+
 volts setVoltage(volts speed, dist scale) {
-  volts nextV = {.l = (30 + speed.l) * scale.l, .r = (30 + speed.r) * scale.r };
-  if (nextV.l < nextV.r) { isRotatingL = false; isRotatingR = true; }
-  else if (nextV.l > nextV.r) {isRotatingL = true; isRotatingR = false; }
-  else { isRotatingL = false; isRotatingR = false; }
+  volts nextV = (volts){.l = (30 + speed.l) * scale.l, .r = (30 + speed.r) * scale.r };
+  if (nextV.l < nextV.r) { considerRotation(LEFT); }
+  else if (nextV.l > nextV.r) { considerRotation(RIGHT); }
+  else { considerRotation(0); }
   return nextV;
 }
 
