@@ -7,6 +7,9 @@
 #define SISLR 4
 #define SUS 5
 
+#define LEFT 1
+#define RIGHT 2
+
 #define KRED  "\x1B[31m"
 #define KNRM  "\x1B[0m"
 #define KGRN  "\x1B[32m"
@@ -26,6 +29,7 @@ typedef struct {
   int rangeSL;
   int rangeSR;
   int us;
+  int wall;
 } sensors;
 
 typedef struct {

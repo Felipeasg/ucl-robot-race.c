@@ -23,7 +23,8 @@ sensors DEFAULT_SENSORS = {
   .rangeFRAngle = 0,
   .rangeSL = 0,
   .rangeSR = 0,
-  .us = 0
+  .us = 0,
+  .wall = 0
 };
 
 status DEFAULT_STATUS = {
@@ -432,6 +433,13 @@ void addLog(sensors* s, logs* l) {
   }
   memcpy(&l->sensors[l->index], s, sizeof(sensors));
   //printf("index %i eg: %i \n", l->index, l->sensors[l->index].us);
+}
+
+int prevIndex(logs* l) {
+  if (l->empty == true) {
+    return (l->index-1 > 0) ? l->index-1 : 0;
+  }
+  return (l->index-1 >= 0) ? l->index-1 : 19;
 }
 
 void printLogs(logs* l) {
