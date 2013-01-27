@@ -69,6 +69,7 @@ typedef struct {
 } robot;
 
 typedef struct {
+<<<<<<< HEAD:inc/common.h
   bool checkFront;
   bool checkBack;
   bool checkSide;
@@ -84,12 +85,24 @@ typedef struct {
 
   int considerSide;
 } request;
+=======
+  sensors sensors[5];
+  int index;
+  bool empty;
+  bool wall;
+} logs;
+>>>>>>> 3bc8e3c27e3b0568d0311c901159394c11bafc79:common.h
 
 extern sensors DEFAULT_SENSORS;
 extern status DEFAULT_STATUS;
 extern volts DEFAULT_VOLTS;
+<<<<<<< HEAD:inc/common.h
 extern request DEFAULT_REQUEST;
 extern robot r;
+=======
+extern logs l;
+extern int sock;
+>>>>>>> 3bc8e3c27e3b0568d0311c901159394c11bafc79:common.h
 
 
 int abs (int);
@@ -107,8 +120,6 @@ void moveStraightAtVoltage(int);
 
 void turnOnSpotAtVoltage(int);
 
-bool sensorToBe(int, int, int);
-bool sensorsToBe(sensors*, sensors*, sensors*);
 void stopMovement();
 
 

@@ -55,6 +55,7 @@ dist angleWall;
 int backConsidered, backDif; dist backVal= {999,999};
 const int backOk=20, backRange=5, backMinimum=15;
 
+<<<<<<< HEAD
 int sideConsidered, sideDif; dist sideVal = {999,999};
 const int sideOk=30, sideRange=5, sideMinimum=8;
 
@@ -76,6 +77,65 @@ request req = {
 void setWall() {
   if (r.s.rangeSL != r.s.rangeSR) {
     if (r.s.wall == 0) {r.s.wall = (r.s.rangeSL < r.s.rangeSR) ? LEFT : RIGHT; printf("\n\n\tWall set. \n\n");}
+=======
+// void reposition(bool minCase, bool maxCase, current, initial, toBeMin, toBeMax) {
+//   while (1) {
+//     minCase = !sensorsToBe(current, initial, toBeMin);
+//     maxCase = sensorsToBe(current, initial, toBeMax);
+//     if (!(minCase && maxCase) ) break;
+// 
+//     moveStraightAtVoltage(30);
+//     rangeSGet(current);
+//   }
+// }
+
+// void checking (sensors* current, status* us, status* rangeFL, status* rangeFR, status* rangeSL, status* rangeSR) {
+//   // Ultrasound
+//   if (toBe.us <= INFINITEUS) {
+//   } else {
+//     us->straight = true;
+//   }
+// 
+//   // Front
+//   if (toBe.rangeFL <= INFINITEFL) {
+//     rangeFL->straight = true;
+//   } else {
+//     rangeFL->reposition = true;
+//   }
+// 
+//   if (toBe.rangeFR <= INFINITEFR) {
+//     rangeFL->straight = true;
+//   } else {
+//   }
+// 
+//   // Side
+//   if (toBe.rangeSL <= INFINITESL) {
+//   } else {
+//   }
+// 
+//   if (toBe.rangeSR <= INFINITESR) {
+//   } else {
+//   }
+// }
+
+
+// TODO
+// - noise detection
+// - derivative / change in sensors
+// - proportion
+// - rewrite reposition and shouldReposition
+
+void reposition(robot* r, int encodersL, int encodersR, int voltageL, int voltageR) {
+  sensors toBe = DEFAULT_SENSORS;
+  sensors initial = DEFAULT_SENSORS;
+  encodersSet(&initial, r->s.encodersL, r->s.encodersR);
+  encodersSet(&toBe, encodersL, encodersR);
+
+  encodersGet(&r->s);
+  while (sensorsToBe(&r->s, &initial, &toBe)) {
+    moveAtVoltage(voltageL, voltageR);
+    encodersGet(&r->s);
+>>>>>>> 3bc8e3c27e3b0568d0311c901159394c11bafc79
   }
   // if (r.s.wall == 0) r.s.wall = (r.s.rangeFL <= r.s.rangeFR) ? LEFT : RIGHT;
 }
@@ -194,6 +254,7 @@ volts setVoltage(volts speed, dist scale) {
 
 int main () {
   initSocket();
+<<<<<<< HEAD
   encodersReset();
   sensors initial;
   double toFront;
@@ -259,6 +320,9 @@ int main () {
     
     // might be used for scale in tunnels to moderate velocity
     if (req.calculateSide == true) {
+=======
+  robot r = {.s= DEFAULT_SENSORS, .v= (volts){r: 20, l: 20}};
+>>>>>>> 3bc8e3c27e3b0568d0311c901159394c11bafc79
 
       sideConsidered = toSide.l;
       sideDif = 40 - sideConsidered; /*/printf("sideDif %i\n", sideDif);/**/
@@ -266,6 +330,7 @@ int main () {
       if (-5 <= sideDif && sideDif <= 5) { sideVal = (dist){0,0}; /*/ printf("side in Range\n"); /**/ }
       if (sideDif < -20) sideVal = (dist){-15,15};
     
+<<<<<<< HEAD
       /**/printf("sideVal %lF %lF\n", sideVal.l, sideVal.r);/**/ // TODO check the other side tooooooo!
       req.calculateSide = false;
     }
@@ -281,6 +346,15 @@ int main () {
     
       /*/printf("frontVal %i\n", frontVal);/**/ // TODO check the other side tooooooo!
       req.calculateFront = false;
+=======
+    usGet(&r.s);
+    rangeFGet(&r.s);
+    rangeSGet(&r.s);
+    logsAdd(&r.s);
+
+    if (!shouldReposition(&r)) {
+      move(&r.v);
+>>>>>>> 3bc8e3c27e3b0568d0311c901159394c11bafc79
     }
 
 
@@ -303,6 +377,52 @@ int main () {
     printf("*  Speed chosen: %i %i\n\n", r.v.l, r.v.r );
     req = DEFAULT_REQUEST;
   }
+  
+    // sensors current = DEFAULT_SENSORS;
+    //  sensors initial = DEFAULT_SENSORS;
+    //  sensors toBe = DEFAULT_SENSORS;
+    //  sensors toBeMin = DEFAULT_SENSORS;
+    //  sensors toBeMax = DEFAULT_SENSORS;
+    //  toBe.rangeSL = 10;
+    //  toBeMax.rangeSL = 12;
+    //  toBeMin.rangeSL = 8;
+    // sensors toBeTravelled1 = DEFAULT_SENSORS;
+    // toBeTravelled1 = (sensors){.encodersL = 800, .encodersR = 800 };
+
+  //  sensors toBeTravelled2 = {.encodersL = 80, .encodersR = 80 };
+    encodersReset();
+
+   // considerSlide(0, 0, 100, 100, &toBeTravelled1);
+   // considerSlide(100, 100, 50, 50, &toBeTravelled2);
+   // changeVelocity(100, 100, 50, 50, &toBeTravelled1, &toBeTravelled2);
+   // stopMovement();
+
+    // considerSlide(0, 0, 100, 100, &toBeTravelled1);
+    // considerSlide(100, 100, 0, 0, &toBeTravelled1);
+    // constAcceleration (0, 0, 100, 100, &toBeTravelled1, 20);
+    // stopMovement();
+    // encodersGet(&current);
+
+    // printf("toBE values: %i\n", toBe.rangeSL);
+    // printf("toBEMax values: %i\n", toBeMax.rangeSL);
+    // printf("toBEMin values: %i\n", toBeMin.rangeSL);
+    // 
+    // while  (1) {
+    //   rangeSGet(&current);
+    //   printf("values: %i, %i %i %i\n", current.rangeSL, toBe.rangeSL, toBeMin.rangeSL, toBeMax.rangeSL);
+    //   printf("NOR max %d min %d\n", sensorsToBe(&current, &initial, &toBeMin), sensorsToBe(&current, &initial, &toBeMax));
+    //   
+    //   bool minCase, maxCase;
+    //   while (1) {
+    //     minCase = !sensorsToBe(&current, &initial, &toBeMin);
+    //     maxCase = sensorsToBe(&current, &initial, &toBeMax);
+    //     if (!(minCase && maxCase) ) break;
+    // 
+    //     moveStraightAtVoltage(30);
+    //     rangeSGet(&current);
+    //   }
+    //   // reposition(minCase, maxCase);
+    // }
 
   return 0;
 }
