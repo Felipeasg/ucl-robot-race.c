@@ -85,9 +85,9 @@ int main () {
           backConsidered = toBack.r;
           backDif = 15 - backConsidered; /*/printf("backDif %i\n", backDif);/**/
 
-          if (backConsidered < 38 && backConsidered >= 25)      {backVal = (dist) {-15,-15};}                 // Too far
-          else if (backConsidered < 25 && backConsidered >= 20) {backVal = (dist) {backDif/1.5,backDif/1.5};} // Far
-          else if (backConsidered < 20 && backConsidered >= 10) {backVal = (dist) {backDif/1.5,backDif/1.5};} // In range
+          if (backConsidered < 38 && backConsidered >= 25)      {backVal = (dist) {+15,+15};}                 // Too far
+          else if (backConsidered < 25 && backConsidered >= 20) {backVal = (dist) {-backDif/1.5,-backDif/1.5};} // Far
+          else if (backConsidered < 20 && backConsidered >= 10) {backVal = (dist) {-backDif/1.5,-backDif/1.5};} // In range
 
         }
         // You are
