@@ -26,4 +26,5 @@ int gp2d120_ir_to_dist(int ir);
 int gp2d12_ir_to_dist(int ir);
 
 int time_to_ticks (int unit, int voltage);
+double wallAngle (int b, int c, int A);
 #endif

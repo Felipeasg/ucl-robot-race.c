@@ -37,3 +37,4 @@ int gp2d120_ir_to_dist(int ir) { return (ir > 80) ? (2914 / (ir + 4)) - 1 : 40; 
 int gp2d12_ir_to_dist(int ir) { return (ir >35) ? (6787 / (ir - 3)) - 4 : 200; }
 
 int time_to_ticks (int unit, int voltage) { return unit * voltage* 0.156; }
+double wallAngle (int b, int c, int A) { return asin( (c * sin(A)) / (sqrt( pow(b,2) + pow(c,2) - 2*b*c ) ) ); }

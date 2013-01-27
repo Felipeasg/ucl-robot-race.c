@@ -6,8 +6,58 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
-#include "queue.h"
+
 #include "common.h"
+
+#include "rangefinders.h"
+#include "encoders.h"
+#include "bumpers.h"
+#include "us.h"
+
+#include "robot.h"
+#include "check.h"
+
+bool
+frontsAreEqual = false,
+frontLInfinite = false,
+frontRInfinite = false,
+frontsAreInfinite = false,
+frontLisCloser = false,
+frontLRisk = false,
+frontRRisk = false,
+
+sidesAreEqual = false,
+sideLInfinite = false,
+sideRInfinite = false,
+sidesAreInfinite = false,
+sideLisCloser = false,
+sideLRisk = false,
+sideRRisk = false,
+
+backLisInfinite = false,
+backRisInfinite = false,
+backsAreInfinite = false,
+backLisCloser = false,
+backLRisk = false,
+backRRisk = false,
+
+isTurningR = false,
+isTurningL = false,
+
+isRotatingL = false,
+isRotatingR = false;
+
+int properRotation = 0;
+dist angleWall;
+
+int backConsidered, backDif; dist backVal= {999,999};
+const int backOk=20, backRange=5, backMinimum=15;
+
+int sideConsidered, sideDif; dist sideVal = {999,999};
+const int sideOk=30, sideRange=5, sideMinimum=8;
+
+int frontConsidered, frontDif, frontVal;
+const int frontOk=30, frontRange=5, frontMinimum=8;
 
 
 #define WHEELREVOLUTION 100 * 3.14159
@@ -469,6 +519,22 @@ void printLogs(logs* l) {
     
   }
 }
+
+void setWall() {
+  if (r.s.rangeSL != r.s.rangeSR) {
+    if (r.s.wall == 0) {r.s.wall = (r.s.rangeSL < r.s.rangeSR) ? LEFT : RIGHT; printf("\n\n\tWall set. \n\n");}
+  }
+  // if (r.s.wall == 0) r.s.wall = (r.s.rangeFL <= r.s.rangeFR) ? LEFT : RIGHT;
+}
+
+volts setVoltage(volts speed, dist scale) {
+  volts nextV = (volts){.l = (30 + speed.l) * scale.l, .r = (30 + speed.r) * scale.r };
+  if (nextV.l < nextV.r) { considerRotation(LEFT); }
+  else if (nextV.l > nextV.r) { considerRotation(RIGHT); }
+  else { considerRotation(0); }
+  return nextV;
+}
+
 // TODO
 // turn very slowly
 // move as fast as he can.

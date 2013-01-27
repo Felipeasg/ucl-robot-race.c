@@ -91,6 +91,43 @@ extern volts DEFAULT_VOLTS;
 extern request DEFAULT_REQUEST;
 extern robot r;
 
+extern bool
+frontsAreEqual,
+frontLInfinite,
+frontRInfinite,
+frontsAreInfinite,
+frontLisCloser,
+frontLRisk,
+frontRRisk,
+
+sidesAreEqual,
+sideLInfinite,
+sideRInfinite,
+sidesAreInfinite,
+sideLisCloser,
+sideLRisk,
+sideRRisk,
+
+backLisInfinite,
+backRisInfinite,
+backsAreInfinite,
+backLisCloser,
+backLRisk,
+backRRisk,
+
+isTurningR,
+isTurningL,
+
+isRotatingL,
+isRotatingR;
+
+extern int properRotation;
+
+extern dist angleWall, backVal, sideVal;
+
+extern int backConsidered, backDif, sideConsidered, sideDif, frontConsidered, frontDif, frontVal;
+extern const int backOk, backRange, backMinimum, sideOk, sideRange, sideMinimum, frontOk, frontRange, frontMinimum;
+
 
 int abs (int);
 double absDouble(double i);
@@ -113,6 +150,8 @@ bool sensorsToBe(sensors* Sensors, sensors* initial, sensors* toBe);
 
 void cTrail();
 double min(double one, double two);
+void setWall();
+volts setVoltage(volts speed, dist scale);
 #endif
 
 
