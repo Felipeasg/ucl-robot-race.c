@@ -70,6 +70,7 @@ int main () {
         
         // No risks. Left wall. Touching back. We are in a deep corner. Turn
         else if (r.s.wall == LEFT && sideLInfinite && !backLisInfinite) { /**/printf("No risks. Left wall. Touching back. Turn\n");/**/
+
           backConsidered = toBack.l;
           backDif = 15 - backConsidered; /*/printf("backDif %i\n", backDif);/**/
           backVal = (dist) {backDif/1.5,backDif/1.5};
@@ -77,7 +78,15 @@ int main () {
           if (backDif < -10) backVal = (dist){-15, -15};
           
          // No risks. Left wall. Touching back. We are in a deep corner. Turn
-        } else if (r.s.wall == RIGHT && sideLInfinite && !backLisInfinite) {/**/printf("No Risks. Right Wall is being followed %i.\n", r.s.wall);/**/ backVal = (dist){999, 999};}
+        } else if (r.s.wall == RIGHT && sideLInfinite && !backLisInfinite) {/**/printf("No Risks. Right Wall is being followed %i.\n", r.s.wall);/**/ 
+
+          backConsidered = toBack.r;
+          backDif = 15 - backConsidered; /*/printf("backDif %i\n", backDif);/**/
+          backVal = (dist) {-backDif/1.5,-backDif/1.5};
+          // Never happened, this means it touches if very far
+          if (backDif < -10) backVal = (dist){+15, +15};
+
+        }
         // You are
         else {backVal = (dist){999, 999};}
         
@@ -92,12 +101,19 @@ int main () {
     // might be used for scale in tunnels to moderate velocity
     if (req.calculateSide == true) {
 
-      sideConsidered = toSide.l;
-      sideDif = 40 - sideConsidered; /*/printf("sideDif %i\n", sideDif);/**/
-      sideVal = (dist) {sideDif, sideDif};
-      if (-5 <= sideDif && sideDif <= 5) { sideVal = (dist){0,0}; /*/ printf("side in Range\n"); /**/ }
-      if (sideDif < -20) sideVal = (dist){-15,15};
-
+      if (r.s.wall == LEFT) {
+        sideConsidered = toSide.l;
+        sideDif = 40 - sideConsidered; /*/printf("sideDif %i\n", sideDif);/**/
+        sideVal = (dist) {sideDif, sideDif};
+        if (-5 <= sideDif && sideDif <= 5) { sideVal = (dist){0,0}; /*/ printf("side in Range\n"); /**/ }
+        if (sideDif < -20) sideVal = (dist){-15,-15};
+      } else {
+        sideConsidered = toSide.r;
+        sideDif = 40 - sideConsidered; /*/printf("sideDif %i\n", sideDif);/**/
+        sideVal = (dist) {-sideDif, -sideDif};
+        if (-5 <= sideDif && sideDif <= 5) { sideVal = (dist){0,0}; /*/ printf("side in Range\n"); /**/ }
+        if (sideDif < -20) sideVal = (dist){+15,+15};
+      }
       /**/printf("sideVal %lF %lF\n", sideVal.l, sideVal.r);/**/ // TODO check the other side tooooooo!
       req.calculateSide = false;
     }
