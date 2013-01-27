@@ -7,6 +7,8 @@ We use Makefile to compile.
 `make wall2` to make the wall follower.
 `make triangle` to make the wall follower.
 
+and then `./go` to move the robot
+
 Tests
 =====
 

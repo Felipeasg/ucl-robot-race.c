@@ -31,6 +31,7 @@ request req = { .checkFront = true, .checkBack = true, .checkSide = true, .check
 };
 
 int main () {
+  printf(KRED "\n\n\n\n PLEASE COMPILE DOING make wall \n\n\n\n"KNRM);
   initSocket();
   encodersReset();
   sensors initial;
