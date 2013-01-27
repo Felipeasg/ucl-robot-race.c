@@ -52,10 +52,10 @@ isRotatingR = false;
 int properRotation = 0;
 dist angleWall;
 
-int backConsidered, backDif; dist backVal;
+int backConsidered, backDif; dist backVal= {999,999};
 const int backOk=20, backRange=5, backMinimum=15;
 
-int sideConsidered, sideDif, sideVal;
+int sideConsidered, sideDif; dist sideVal = {999,999};
 const int sideOk=30, sideRange=5, sideMinimum=8;
 
 int frontConsidered, frontDif, frontVal;
@@ -74,7 +74,9 @@ request req = {
 };
 
 void setWall() {
-  if (r.s.wall == 0) {r.s.wall = (r.s.rangeSL <= r.s.rangeSR) ? LEFT : RIGHT; printf("\n\n\tWall set. \n\n");}
+  if (r.s.rangeSL != r.s.rangeSR) {
+    if (r.s.wall == 0) {r.s.wall = (r.s.rangeSL < r.s.rangeSR) ? LEFT : RIGHT; printf("\n\n\tWall set. \n\n");}
+  }
   // if (r.s.wall == 0) r.s.wall = (r.s.rangeFL <= r.s.rangeFR) ? LEFT : RIGHT;
 }
 
@@ -230,46 +232,26 @@ int main () {
     if (req.calculateBack == true) {
       
       // In case of no risk
-      printf("frontLRisk %d frontLRisk %d sideLRisk %d sideRRisk %d backLRisk %d backRRisk\n", frontLRisk, frontLRisk, sideLRisk, sideRRisk, backLRisk, backRRisk);
+      /**/printf("frontLRisk %d frontLRisk %d sideLRisk %d sideRRisk %d backLRisk %d backRRisk %d wall %d\n", frontLRisk, frontLRisk, sideLRisk, sideRRisk, backLRisk, backRRisk, r.s.wall);/**/
       if (!frontLRisk && !frontLRisk && !sideLRisk && !sideRRisk && !backLRisk && !backRRisk) {
+
         // Continues if no wall has been followed
-        if (r.s.wall == 0) { backVal = (dist) {0,0}; printf("No risks. No wall. Go straight\n"); }
+        if (r.s.wall == 0) { backVal = (dist) {0,0}; /**/printf("No risks. No wall. Go straight\n"); }/**/
+        
         // You are in a deep corner, you may want to turn proportionally to distance.
-        else if (r.s.wall == LEFT && sideLInfinite && !backLisInfinite) { printf("No risks. Left wall. Touching back. Turn\n");
+        else if (r.s.wall == LEFT && sideLInfinite && !backLisInfinite) { /**/printf("No risks. Left wall. Touching back. Turn\n");/**/
           backConsidered = toBack.l;
           backDif = 15 - backConsidered; /*/printf("backDif %i\n", backDif);/**/
           backVal = (dist) {backDif/1.5,backDif/1.5};
           // Never happened, this means it touches if very far
           if (backDif < -10) backVal = (dist){-15, -15};
-        } else if (r.s.wall == LEFT && sideLInfinite && !backLisInfinite) {printf("No Risks. Right Wall is being followed %i.\n", r.s.wall); backVal = (dist){0, 0};}
-        else {backVal = (dist){0, 0};}
+          
+        // You are right corner
+        } else if (r.s.wall == RIGHT && sideLInfinite && !backLisInfinite) {/**/printf("No Risks. Right Wall is being followed %i.\n", r.s.wall);/**/ backVal = (dist){999, 999};}
+        // You are
+        else {backVal = (dist){999, 999};}
         
-      } else { printf("Risks, skip.\n"); backVal = (dist){0, 0}; }
-      // 
-      // backConsidered = toBack.l;
-      // backDif = 30 - backConsidered; printf("backDif %i\n", backDif);
-      // 
-      // // Wall is too close
-      // backVal = (dist) {backDif,backDif};
-      // 
-      // // Wall is in range
-      // if (15 <= backConsidered && backConsidered <= 30) { backVal = (dist){0,0}; printf("back in Range\n"); }
-      // 
-      // // Wall is far
-      // if (backConsidered <= 37) {
-      // 
-      //   if (r.s.wall == 0) {
-      //     // Front is clear go straight if wall is not set
-      //     backVal = (dist){0,0}; printf("frontsAreInfinite therefore can go Straight\n");
-      //   }
-      // 
-      //   // Side exists, go straight
-      //   // if (!sideLInfinite && !sideLRisk) {backVal = (dist){0,0}; printf("sidesAreInfinite therefore can go Straight\n");}
-      // }
-      // 
-      // // Wall is infinite
-      // if (backConsidered == 38)
-      //     
+      } else { /**/printf("Risks, skip.\n");/**/ backVal = (dist){999, 999}; }
       printf("backVal %lF %lF\n", backVal.l, backVal.r);// TODO check the other side tooooooo!
       req.calculateBack = false;
     }
@@ -279,12 +261,12 @@ int main () {
     if (req.calculateSide == true) {
 
       sideConsidered = toSide.l;
-      sideDif = sideOk - sideConsidered; /*/printf("sideDif %i\n", sideDif);/**/
-      sideVal = sideDif;
-      if (-sideRange <= sideDif && sideDif <= sideRange) { sideVal = 0; /*/ printf("side in Range\n"); /**/ }
-      if (sideVal <= -sideMinimum) { }
+      sideDif = 40 - sideConsidered; /*/printf("sideDif %i\n", sideDif);/**/
+      sideVal = (dist) {sideDif, sideDif};
+      if (-5 <= sideDif && sideDif <= 5) { sideVal = (dist){0,0}; /*/ printf("side in Range\n"); /**/ }
+      if (sideDif < -20) sideVal = (dist){-15,15};
     
-      /*/printf("sideVal %i\n", sideVal);/**/ // TODO check the other side tooooooo!
+      /**/printf("sideVal %lF %lF\n", sideVal.l, sideVal.r);/**/ // TODO check the other side tooooooo!
       req.calculateSide = false;
     }
     
@@ -308,7 +290,9 @@ int main () {
     // Check for risk
       // - recalculate speed
 
-    speed = (volts){backVal.l,-backVal.r};
+    if (frontVal != 999) speed = (volts){frontVal,-frontVal};
+    if (sideVal.l != 999 && sideVal.r != 999) speed = (volts){sideVal.l,-sideVal.r};
+    if (backVal.l != 999 && backVal.r != 999) speed = (volts){backVal.l,-backVal.r};
 
     // Assign voltage
     r.v = setVoltage(speed, scale);

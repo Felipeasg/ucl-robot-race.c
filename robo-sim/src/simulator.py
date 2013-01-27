@@ -63,7 +63,7 @@ class Simulator():
         starttime = realtime
         cur_time = 0
         iter_time = 0
-        sleep_time = 0.055
+        sleep_time = 0.005
         while TRUE:
             realtime = time.time()
             cur_time = cur_time + 1

@@ -69,7 +69,7 @@ robot r = {
     .wall = 0
   },
   .v = (volts){r: 20, l: 20},
-  .l = (logs){.index = -1, .empty = true, .wall=-1}
+  .l = (logs){.index = -1, .empty = true, .wall=0 }
 };
 
 double min(double one, double two) {
