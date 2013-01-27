@@ -15,6 +15,9 @@
 #define ACCURATE true
 #define INACCURATE false
 
+#define CHECKFRONT 1
+#define CHECKSIDE 2
+#define CHECKBACK 3
 
 bool
 frontsAreEqual = false,
@@ -40,8 +43,34 @@ backLisCloser = false,
 backLRisk = false,
 backRRisk = false,
 
+isTurningR = false,
+isTurningL = false,
+
 isRotatingL = false,
 isRotatingR = false;
+
+int properRotation = 0;
+
+int backConsidered, backDif, backVal;
+const int backOk=30, backRange=5, backMinimum=8;
+
+int sideConsidered, sideDif, sideVal;
+const int sideOk=30, sideRange=5, sideMinimum=8;
+
+int frontConsidered, frontDif, frontVal;
+const int frontOk=30, frontRange=5, frontMinimum=8;
+
+request req = {
+  .checkFront = true,
+  .checkBack = true,
+  .checkSide = true,
+  .checkEncoders = true,
+  
+  .calculateBack = true,
+  .calculateSide = true,
+  .calculateFront = true,
+  .setWallAuto = true
+};
 
 double checkFront(bool accurate) {
 
@@ -69,8 +98,8 @@ dist checkBack(bool accurate) {
   backRisInfinite = (r.s.rangeSR == 38);
   backsAreInfinite = (backLisInfinite && backRisInfinite);
   backLisCloser = (r.s.rangeSL < r.s.rangeSR);
-  backLRisk = (r.s.rangeSL < 20);
-  backRRisk = (r.s.rangeSR < 20);
+  backLRisk = (r.s.rangeSL < 15);
+  backRRisk = (r.s.rangeSR < 15);
   setWall();
   return (dist){r.s.rangeSL,r.s.rangeSR};
 }
@@ -121,11 +150,18 @@ void considerRotation(int direction) {
   
   if (direction == LEFT) {
     isRotatingL = true; isRotatingR = false;
+    isTurningR = false;
   } else if (direction == RIGHT) {
     isRotatingL = false; isRotatingR = true;
+    isTurningL = false;
   } else {
     isRotatingL = false; isRotatingR = false;
+    isTurningL = false;
+    isTurningR = false;
   }
+  
+  if (!isTurningL && direction == LEFT && properRotation == 5) isTurningL = true;
+  else if (!isTurningR && direction == RIGHT && properRotation == 5) isTurningR = true;
 }
 
 volts setVoltage(volts speed, dist scale) {
@@ -141,62 +177,92 @@ int main () {
   encodersReset();
   sensors initial;
   double toFront;
-  dist toBack;
-  dist toSide;
-  volts speed;
-  dist scale;
+  dist toBack = {0,0};
+  dist toSide = {0,0};
+  volts speed = {30,30};
+  dist scale = {1,1};
 
   while(1) {
     // This is a new cycle, first check and then move
     cTrail();
     memcpy(&initial, &r.s, sizeof(sensors));
-    moveAtVoltage(r.v.r, r.v.r);
+
+    if (req.setWallAuto) {
+      if (r.s.wall == LEFT) req.considerSide = LEFT;
+      else if (r.s.wall == RIGHT) req.considerSide = RIGHT;
+      else req.considerSide = 0;
+    }
 
     // Check sensors
-    toFront = checkFront(ACCURATE);
-    toBack = checkBack(ACCURATE);
-    toSide = checkSide(ACCURATE, 0, 0);
+    if (req.checkFront == true) { toFront = checkFront(ACCURATE); printf("toFront %lF\n", toFront); req.checkFront = false; }
+    if (req.checkBack == true) { toBack = checkBack(ACCURATE); printf("toBack %lF %lF\n", toBack.l, toBack.r); req.checkBack = false; }
+    if (req.checkSide == true) { toSide = checkSide(ACCURATE, 0, 0); printf("toSide %lF %lF\n", toSide.l, toSide.r); req.checkSide == false; }
+    if (req.checkEncoders == true) { encodersGet(&r.s);  printf("encoders %i %i\n", r.s.encodersL, r.s.encodersR);}
+    // if (req.saveLogs == true) addLog(&r.s, &r.l);
 
-    // This gives me the difference between the wheels
-  
-    int dif = 40 - toSide.l;
-    int val = dif;
-    if (val < 5 && val > -5) { val = 0; }
-    if (val < -15) {val = -15; }
-
-    speed = (volts){val,-val};
     
+    // Calculate speed
+    // if (req.calculateSpeed) 
+    int dif = 40 - toSide.l;
+    int val = cbrt(dif);
+
+    // might be used for scale in tunnels to moderate velocity
+    if (req.calculateBack == true) {
+
+      backConsidered = toBack.l;
+      backDif = backOk - backConsidered; printf("backDif %i\n", backDif);
+      backVal = backDif;
+      if (-backRange <= backDif && backDif <= backRange) { backVal = 0; printf("back in Range\n"); }
+      if (backVal <= -backMinimum) { req.calculateSide = true; req.calculateBack = false; printf("j calculateSide from cBack\n"); continue; }
+    
+      printf("backVal %i\n", backVal);// TODO check the other side tooooooo!
+      req.calculateBack = false;
+    }
+    
+    
+    // might be used for scale in tunnels to moderate velocity
+    if (req.calculateSide == true) {
+
+      sideConsidered = toSide.l;
+      sideDif = sideOk - sideConsidered; printf("sideDif %i\n", sideDif);
+      sideVal = sideDif;
+      if (-sideRange <= sideDif && sideDif <= sideRange) { sideVal = 0; printf("side in Range\n"); }
+      if (sideVal <= -sideMinimum) { printf("j calculateSide from cSide\n"); }
+    
+      printf("sideVal %i\n", sideVal);// TODO check the other side tooooooo!
+      req.calculateSide = false;
+    }
+    
+    // might be used for scale in tunnels to moderate velocity
+    if (req.calculateFront == true) {
+
+      frontConsidered = toFront;
+      frontDif = frontOk - frontConsidered; printf("frontDif %i\n", frontDif);
+      frontVal = frontDif;
+      if (-frontRange <= frontDif && frontDif <= frontRange) { frontVal = 0; printf("front in Range\n"); }
+      if (frontVal <= -frontMinimum) { req.calculateSide = true; req.calculateFront = false; printf("j calculateSide from cFront\n"); continue; }
+    
+      printf("frontVal %i\n", frontVal);// TODO check the other side tooooooo!
+      req.calculateFront = false;
+    }
+
+
+    
+    // Calculate scale
+    
+    // Check for risk
+      // - recalculate speed
+
+    speed = (volts){backVal,-backVal};
+
+    // Assign voltage
     r.v = setVoltage(speed, scale);
-    printf("Speed chosen: %i %i\n", r.v.l, r.v.r );
 
-    // toTravel -= slideE(currentV.r, nextV.l);
-    // toTravelR -= slideE(currentV.r, nextV.r);
+
+    // Finally arrived here
     moveAtVoltage(r.v.l, r.v.r);
-    encodersGet(&r.s); addLog(&r.s, &r.l);
-
-
-    // encodersGet(&r.s);
-    // rangeSGet(&r.s);
-    // 
-    // fflush(stdout); printf(KRED "I can travel %i (%lF encoders)\n"KNRM,r.s.us, toTravel/T2CM);
-    // 
-    // printLogs(&r.l);
-    // 
-    // r.v.l = 30;
-    // r.v.r = 30;
-    // volts currentV = {r.v.l,r.v.r};
-    // volts nextV;
-    // while (sensorToBe(r.s.encodersL, initial.encodersL, toTravel)) {
-    //   nextV =  (volts){.l = (r.v.l + speed.l) * scale.l, .r = (r.v.r - speed.r) * scale.r };
-    //   toTravel -= slideE(currentV.r, nextV.l);
-    //   toTravelR -= slideE(currentV.r, nextV.r);
-    //   memcpy(&currentV, &nextV, sizeof(volts));
-    //   moveAtVoltage(currentV.l, currentV.r);
-    // 
-    //   encodersGet(&r.s);
-    //   addLog(&r.s, &r.l);
-    //   printf("Actual: %i and %lF (%lF)\n", r.s.encodersL-initial.encodersL, (double)500/(r.s.encodersL-initial.encodersL), toTravel);
-    // }
+    printf("Speed chosen: %i %i\n", r.v.l, r.v.r );
+    req = DEFAULT_REQUEST;
   }
 
   return 0;

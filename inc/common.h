@@ -68,9 +68,27 @@ typedef struct {
   logs l;
 } robot;
 
+typedef struct {
+  bool checkFront;
+  bool checkBack;
+  bool checkSide;
+  bool checkEncoders;
+  
+  bool calculateSpeed;
+  bool calculateBack;
+  bool calculateFront;
+  bool calculateSide;
+  
+  bool setWallAuto;
+  bool setWall;
+
+  int considerSide;
+} request;
+
 extern sensors DEFAULT_SENSORS;
 extern status DEFAULT_STATUS;
 extern volts DEFAULT_VOLTS;
+extern request DEFAULT_REQUEST;
 extern robot r;
 
 

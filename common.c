@@ -38,6 +38,18 @@ volts DEFAULT_VOLTS = {
   .r = 0
 };
 
+request DEFAULT_REQUEST = {
+  .checkFront = true,
+  .checkBack = true,
+  .checkSide = true,
+  .checkEncoders = true,
+  
+  .calculateBack = true,
+  .calculateSide = true,
+  .calculateFront = true,
+  .setWallAuto = true
+};
+
 int sock = -1;
 
 robot r = {
