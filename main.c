@@ -73,6 +73,11 @@ request req = {
   .setWallAuto = true
 };
 
+void setWall() {
+  if (r.s.wall == 0) {r.s.wall = (r.s.rangeSL <= r.s.rangeSR) ? LEFT : RIGHT; printf("\n\n\tWall set. \n\n");}
+  // if (r.s.wall == 0) r.s.wall = (r.s.rangeFL <= r.s.rangeFR) ? LEFT : RIGHT;
+}
+
 double checkFront(bool accurate) {
 
   moveILR(60,-60);
@@ -82,8 +87,8 @@ double checkFront(bool accurate) {
   frontRInfinite = (r.s.rangeFR == 100 );
   frontsAreInfinite = (frontLInfinite == true && frontRInfinite == true);
   frontLisCloser = (r.s.rangeFL < r.s.rangeFR);
-  frontLRisk = (r.s.rangeFL < 20);
-  frontRRisk = (r.s.rangeFR < 20);
+  frontLRisk = (rangeFLFront(r.s.rangeFL) < 15);
+  frontRRisk = (rangeFRFront(r.s.rangeFR) < 15);
   
   if (frontsAreEqual && frontsAreInfinite && !accurate) return 100;
   else if (frontsAreEqual && !frontsAreInfinite) return rangeFRFront(r.s.rangeFR);
@@ -99,8 +104,8 @@ dist checkBack(bool accurate) {
   backRisInfinite = (r.s.rangeSR == 38);
   backsAreInfinite = (backLisInfinite && backRisInfinite);
   backLisCloser = (r.s.rangeSL < r.s.rangeSR);
-  backLRisk = (r.s.rangeSL < 15);
-  backRRisk = (r.s.rangeSR < 15);
+  backLRisk = (r.s.rangeSL < 10);
+  backRRisk = (r.s.rangeSR < 10);
   setWall();
   return (dist){r.s.rangeSL,r.s.rangeSR};
 }
@@ -124,7 +129,7 @@ dist checkSide(bool accurate, int angleL, int angleR) {
   // Tracking horizontal
   moveILR(-45, 45);
   rangeFGet(&horizontal);
-  printf("\n UUUUUUU %i %i\n\n", horizontal.encodersL, horizontal.encodersR);
+  /*/printf("\n UUUUUUU %i %i\n\n", horizontal.rangeFL, horizontal.rangeFR);/**/
   
   // Tracking wanted angle
   moveILR(angleL, angleR);
@@ -142,23 +147,18 @@ dist checkSide(bool accurate, int angleL, int angleR) {
   sideRInfinite = (r.s.rangeFR == 100 );
   sidesAreInfinite = (sideLInfinite == true && sideRInfinite == true);
   sideLisCloser = (r.s.rangeFL < r.s.rangeFR);
-  sideLRisk = (rangeFLSide(r.s.rangeFL) < 10);
-  sideRRisk = (rangeFRSide(r.s.rangeFR) < 10);
+  sideLRisk = (rangeFLSide(r.s.rangeFL) < 15);
+  sideRRisk = (rangeFRSide(r.s.rangeFR) < 15);
 
   // Calculate angle
   int angleDifL = angleL + 45;
   int angleDifR = angleR - 45;
-  angleWall.l = (horizontal.encodersL != 100 && r.s.encodersL != 100) ? wallAngle(horizontal.encodersL, r.s.encodersL, angleDifL) : -1;
-  angleWall.r = (horizontal.encodersR != 100 && r.s.encodersR != 100) ? wallAngle(horizontal.encodersR, r.s.encodersR, angleDifR) : -1;
+  angleWall.l = (horizontal.rangeFL != 100 && r.s.rangeFL != 100) ? wallAngle(horizontal.rangeFL, r.s.rangeFL, angleDifL) : -1;
+  angleWall.r = (horizontal.rangeFR != 100 && r.s.rangeFR != 100) ? wallAngle(horizontal.rangeFR, r.s.rangeFR, angleDifR) : -1;
 
   // Return distance and set wall if needed
   setWall();
   return (dist){ rangeFLSide(r.s.rangeFL), rangeFRSide(r.s.rangeFR)};
-}
-
-int setWall() {
-  if (r.s.wall == 0) r.s.wall = (r.s.rangeSL <= r.s.rangeSR) ? LEFT : RIGHT;
-  if (r.s.wall == 0) r.s.wall = (rangeFLSide(r.s.rangeFL) <= rangeFRSide(r.s.rangeFR)) ? LEFT : RIGHT;
 }
 
 void considerRotation(int direction) {
@@ -228,31 +228,48 @@ int main () {
     
     // const int backOk=20, backRange=5, backMinimum=8;
     if (req.calculateBack == true) {
-
-      backConsidered = toBack.l;
-      backDif = 30 - backConsidered; printf("backDif %i\n", backDif);
       
-      // Wall is too close
-      backVal = (dist) {backDif,backDif};
-      
-      // Wall is in range
-      if (15 <= backConsidered && backConsidered <= 30) { backVal = (dist){0,0}; printf("back in Range\n"); }
-
-      // Wall is far
-      if (backConsidered <= 37) {
-
-        if (r.s.wall == 0) {
-          // Front is clear go straight if wall is not set
-          backVal = (dist){0,0}; printf("frontsAreInfinite therefore can go Straight\n");
-        }
-
-        // Side exists, go straight
-        // if (!sideLInfinite && !sideLRisk) {backVal = (dist){0,0}; printf("sidesAreInfinite therefore can go Straight\n");}
-      }
-      
-      // Wall is infinite
-      if (backConsidered == 38)
-    
+      // In case of no risk
+      printf("frontLRisk %d frontLRisk %d sideLRisk %d sideRRisk %d backLRisk %d backRRisk\n", frontLRisk, frontLRisk, sideLRisk, sideRRisk, backLRisk, backRRisk);
+      if (!frontLRisk && !frontLRisk && !sideLRisk && !sideRRisk && !backLRisk && !backRRisk) {
+        // Continues if no wall has been followed
+        if (r.s.wall == 0) { backVal = (dist) {0,0}; printf("No risks. No wall. Go straight\n"); }
+        // You are in a deep corner, you may want to turn proportionally to distance.
+        else if (r.s.wall == LEFT && sideLInfinite && !backLisInfinite) { printf("No risks. Left wall. Touching back. Turn\n");
+          backConsidered = toBack.l;
+          backDif = 15 - backConsidered; /*/printf("backDif %i\n", backDif);/**/
+          backVal = (dist) {backDif/1.5,backDif/1.5};
+          // Never happened, this means it touches if very far
+          if (backDif < -10) backVal = (dist){-15, -15};
+        } else if (r.s.wall == LEFT && sideLInfinite && !backLisInfinite) {printf("No Risks. Right Wall is being followed %i.\n", r.s.wall); backVal = (dist){0, 0};}
+        else {backVal = (dist){0, 0};}
+        
+      } else { printf("Risks, skip.\n"); backVal = (dist){0, 0}; }
+      // 
+      // backConsidered = toBack.l;
+      // backDif = 30 - backConsidered; printf("backDif %i\n", backDif);
+      // 
+      // // Wall is too close
+      // backVal = (dist) {backDif,backDif};
+      // 
+      // // Wall is in range
+      // if (15 <= backConsidered && backConsidered <= 30) { backVal = (dist){0,0}; printf("back in Range\n"); }
+      // 
+      // // Wall is far
+      // if (backConsidered <= 37) {
+      // 
+      //   if (r.s.wall == 0) {
+      //     // Front is clear go straight if wall is not set
+      //     backVal = (dist){0,0}; printf("frontsAreInfinite therefore can go Straight\n");
+      //   }
+      // 
+      //   // Side exists, go straight
+      //   // if (!sideLInfinite && !sideLRisk) {backVal = (dist){0,0}; printf("sidesAreInfinite therefore can go Straight\n");}
+      // }
+      // 
+      // // Wall is infinite
+      // if (backConsidered == 38)
+      //     
       printf("backVal %lF %lF\n", backVal.l, backVal.r);// TODO check the other side tooooooo!
       req.calculateBack = false;
     }
@@ -262,12 +279,12 @@ int main () {
     if (req.calculateSide == true) {
 
       sideConsidered = toSide.l;
-      sideDif = sideOk - sideConsidered; printf("sideDif %i\n", sideDif);
+      sideDif = sideOk - sideConsidered; /*/printf("sideDif %i\n", sideDif);/**/
       sideVal = sideDif;
-      if (-sideRange <= sideDif && sideDif <= sideRange) { sideVal = 0; /**/ printf("side in Range\n"); /**/ }
+      if (-sideRange <= sideDif && sideDif <= sideRange) { sideVal = 0; /*/ printf("side in Range\n"); /**/ }
       if (sideVal <= -sideMinimum) { }
     
-      printf("sideVal %i\n", sideVal);// TODO check the other side tooooooo!
+      /*/printf("sideVal %i\n", sideVal);/**/ // TODO check the other side tooooooo!
       req.calculateSide = false;
     }
     
@@ -275,12 +292,12 @@ int main () {
     if (req.calculateFront == true) {
 
       frontConsidered = toFront;
-      frontDif = frontOk - frontConsidered; printf("frontDif %i\n", frontDif);
+      frontDif = frontOk - frontConsidered; /*/printf("frontDif %i\n", frontDif);/**/
       frontVal = frontDif;
-      if (-frontRange <= frontDif && frontDif <= frontRange) { frontVal = 0; printf("front in Range\n"); }
+      if (-frontRange <= frontDif && frontDif <= frontRange) { frontVal = 0; /*/printf("front in Range\n");/**/ }
       if (frontVal <= -frontMinimum) { }
     
-      printf("frontVal %i\n", frontVal);// TODO check the other side tooooooo!
+      /*/printf("frontVal %i\n", frontVal);/**/ // TODO check the other side tooooooo!
       req.calculateFront = false;
     }
 
@@ -299,7 +316,7 @@ int main () {
 
     // Finally arrived here
     moveAtVoltage(r.v.l, r.v.r);
-    printf("*  Speed chosen: %i %i\n", r.v.l, r.v.r );
+    printf("*  Speed chosen: %i %i\n\n", r.v.l, r.v.r );
     req = DEFAULT_REQUEST;
   }
 

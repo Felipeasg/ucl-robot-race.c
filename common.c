@@ -27,6 +27,7 @@ sensors DEFAULT_SENSORS = {
   .wall = 0
 };
 
+
 status DEFAULT_STATUS = {
   .reposition = false,
   .spin = false,
@@ -60,9 +61,12 @@ robot r = {
     .bumpersR = 0,
     .rangeFL = 0,
     .rangeFR = 0,
+    .rangeFLAngle = 0,
+    .rangeFRAngle = 0,
     .rangeSL = 0,
     .rangeSR = 0,
-    .us = 0
+    .us = 0,
+    .wall = 0
   },
   .v = (volts){r: 20, l: 20},
   .l = (logs){.index = -1, .empty = true, .wall=-1}
