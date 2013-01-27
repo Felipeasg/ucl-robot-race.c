@@ -8,15 +8,6 @@
 #include <string.h>
 #include "queue.h"
 #include "common.h"
-<<<<<<< HEAD
-
-=======
-#include "sensors/encoders.h"
-#include "sensors/bumpers.h"
-#include "sensors/rangefinders.h"
-#include "sensors/us.h"
-#include "sensors/sensors.h"
->>>>>>> 3bc8e3c27e3b0568d0311c901159394c11bafc79
 
 
 #define WHEELREVOLUTION 100 * 3.14159
@@ -48,7 +39,6 @@ volts DEFAULT_VOLTS = {
   .r = 0
 };
 
-<<<<<<< HEAD
 request DEFAULT_REQUEST = {
   .checkFront = true,
   .checkBack = true,
@@ -60,9 +50,6 @@ request DEFAULT_REQUEST = {
   .calculateFront = true,
   .setWallAuto = true
 };
-=======
-logs l = {.index = -1, .empty = true};
->>>>>>> 3bc8e3c27e3b0568d0311c901159394c11bafc79
 
 int sock = -1;
 
@@ -139,7 +126,6 @@ void changeVelocity (int fromVL, int fromVR, int toVL, int toVR, sensors* toBeIn
     printf("changeVelocity final from %d:%d and encoders: %d:%d\n", toVL, toVR, current.encodersL, current.encodersR);
 }
 
-<<<<<<< HEAD
 void sensorsGetOneStep(sensors* Sensors, sensors* New, int steps) {
 
   // TODO use sensorsSet instead
@@ -151,9 +137,6 @@ void sensorsGetOneStep(sensors* Sensors, sensors* New, int steps) {
   if (Sensors->rangeFR != 0) New->rangeFR = Sensors->rangeFR/steps;
   if (Sensors->us != 0) New->us = Sensors->us/steps;
 }
-
-=======
->>>>>>> 3bc8e3c27e3b0568d0311c901159394c11bafc79
 void constAcceleration (int initialVL, int initialVR, int finalVL, int finalVR, sensors* toBe, int steps) {
 
   // TODO
@@ -336,7 +319,6 @@ void nextCmd() {
   writeCmd(buf, strlen(buf)); memset(buf, 0, 80); read(sock, buf, 80); // TODO talk with prof
 }
 
-<<<<<<< HEAD
 bool sensorToBe(int current, int initial, int toBe ) {
 
   if (abs(abs(current) - abs(initial)) >= abs(toBe)) // TODO
@@ -404,8 +386,6 @@ void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) 
     printf("PARSE %s %s %s %s\n", elaborated[0], elaborated[1], elaborated[2], elaborated[3]);
 }
 
-=======
->>>>>>> 3bc8e3c27e3b0568d0311c901159394c11bafc79
 void moveAtVoltage(int voltage1, int voltage2) {
 
   stopIf(!inLimit(voltage1) || !inLimit(voltage2));

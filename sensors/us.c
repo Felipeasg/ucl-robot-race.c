@@ -6,11 +6,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
-<<<<<<< HEAD
 #include "common.h"
-=======
-#include "../common.h"
->>>>>>> 3bc8e3c27e3b0568d0311c901159394c11bafc79
 
 
 void usCmd() {
@@ -36,11 +32,7 @@ int usParse(char* elaborated[], sensors* Sensors) {
   if (elaborated[2] == NULL ||
       !strcmp(elaborated[2],"") ) return 1;
 
-<<<<<<< HEAD
   usSet(Sensors, atoi(elaborated[2])-8);
-=======
-  usSet(Sensors, atoi(elaborated[2]));
->>>>>>> 3bc8e3c27e3b0568d0311c901159394c11bafc79
   // it should be 0 for failure, 1 for silent, 2 for OK
   return 2;
 }
