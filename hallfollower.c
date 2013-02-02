@@ -20,13 +20,14 @@
 
 double ratios() {
   
-  int differenceBack = r.s.rangeSR - r.s.rangeSL; int differenceSide = r.s.rangeFR - r.s.rangeFL;
-  double ratioBack = (double) r.s.rangeSR / r.s.rangeSL; double ratioSide = (double) r.s.rangeFR / r.s.rangeFL;
+  // int differenceBack = r.s.rangeSR - r.s.rangeSL; int differenceSide = r.s.rangeFR - r.s.rangeFL;
+  // double ratioBack = (double) r.s.rangeSR / r.s.rangeSL;
+  double ratioSide = (double) r.s.rangeFR / r.s.rangeFL;
 
-  dist expectDifferenceBack = { 0 - r.s.rangeSL, 0 - r.s.rangeSR}; dist expectDifferenceSide = {27 - r.s.rangeFL,27 - r.s.rangeFR};
-  dist expectRatioBack = {27.0 / r.s.rangeSL,27.0 / r.s.rangeSR}; dist expectRatioSide = {27.0 / r.s.rangeFL,27.0 / r.s.rangeFR};
+  // dist expectDifferenceBack = { 0 - r.s.rangeSL, 0 - r.s.rangeSR}; dist expectDifferenceSide = {27 - r.s.rangeFL,27 - r.s.rangeFR};
+  // dist expectRatioBack = {27.0 / r.s.rangeSL,27.0 / r.s.rangeSR}; dist expectRatioSide = {27.0 / r.s.rangeFL,27.0 / r.s.rangeFR};
 
-  printf("PARSE sl%i sr%i fl%i fr%i us%i\n", r.s.rangeSL, r.s.rangeSR, r.s.rangeFL, r.s.rangeFR, r.s.us);
+  // printf("PARSE sl%i sr%i fl%i fr%i us%i\n", r.s.rangeSL, r.s.rangeSR, r.s.rangeFL, r.s.rangeFR, r.s.us);
   return ratioSide;
   
 }
@@ -43,15 +44,14 @@ void record (sensors **history, sensors *ptr) {
 }
 
 void passage_drive (double ratio, sensors **history) {
-  
-  double wheelTurns = 0.001;
+
   int speed = 20;
   
   volts voltage;
-  voltage.l = ratio < 1.0 ? (double)speed*ratio : speed * (wheelTurns < 0.0 ? -1 : 1);
-  voltage.r = ratio > 1.0 ? (double)speed/ratio : speed * (wheelTurns < 0.0 ? -1 : 1);
+  voltage.l = ratio < 1.0 ? (double)speed*ratio : speed;
+  voltage.r = ratio > 1.0 ? (double)speed/ratio : speed;
 
-  moveAtVoltage(voltage.l, voltage.r);
+  move(voltage);
   encodersGet(&r.s);
 
   record(history, &r.s);
@@ -96,7 +96,7 @@ void hall(sensors **history) { usGet(&r.s); rangeFGet(&r.s); rangeSGet(&r.s); ad
 
   moveILR(-16,16);
   
-  while (r.s.us > 20) { usGet(&r.s); rangeFGet(&r.s); rangeSGet(&r.s);
+  while (r.s.us > 15) { usGet(&r.s); rangeFGet(&r.s); rangeSGet(&r.s);
     
     double ratio = ratios();
 
