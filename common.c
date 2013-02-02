@@ -545,6 +545,84 @@ void reposition(robot* r, int encodersL, int encodersR, int voltageL, int voltag
   }
 }
 
+void record (sensors **history, sensors *ptr) {
+
+  sensors *recording = (sensors*)malloc(sizeof(sensors));
+
+  *recording = *ptr;
+  recording->next = *history;
+
+  *history = recording;
+
+}
+
+void passage_drive (sensors **history, int speed) {
+  
+  double ratio = ratios(&r.s);
+
+  volts voltage;
+  voltage.l = ratio < 1.0 ? (double)speed*ratio : speed;
+  voltage.r = ratio > 1.0 ? (double)speed/ratio : speed;
+
+  move(&voltage);
+
+  encodersGet(&r.s);
+  record(history, &r.s);
+  
+}
+
+void playback (sensors **history, int speed) {
+
+  sensors initial;
+  dist todo;
+  volts voltage;
+
+  encodersGet(&initial);
+
+  reposition(&r, 400, 400, 20, -20);
+
+  r.s = DEFAULT_SENSORS;
+  encodersReset();
+
+  while (*history)
+  {
+      do {
+          todo.l = initial.encodersL - r.s.encodersR > (*history)->encodersL;
+          todo.r = initial.encodersR - r.s.encodersL > (*history)->encodersR;
+          
+          /* For now this is a bad way of turning, we want to turn at proper angle */
+          /*
+          playback -
+          while (encoders with same speed) {apply}
+          
+          record -
+          save when change speed
+          */
+          voltage = (volts){ speed * (todo.r ? 1 : 0), speed * (todo.l ? 1 : 0) };
+
+          move(&voltage);
+
+          encodersGet(&r.s);
+          
+      } while (todo.r || todo.l);
+      
+      *history = (*history)->next;
+  }
+}
+
+void dead_end(sensors **history, int speed) { usGet(&r.s); rangeFGet(&r.s); rangeSGet(&r.s); addLog(&r.s, &r.l);
+
+  moveILR(-16,16);
+  
+  while (r.s.us > 15) { usGet(&r.s); rangeFGet(&r.s); rangeSGet(&r.s);
+
+    passage_drive(history, speed);
+    
+    addLog(&r.s, &r.l);
+  }
+
+}
+
 // TODO
 // turn very slowly
 // move as fast as he can.

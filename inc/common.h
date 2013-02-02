@@ -166,6 +166,12 @@ volts setVoltage(volts speed, dist scale);
 void reposition(robot* r, int encodersL, int encodersR, int voltageL, int voltageR);
 volts shouldReposition();
 
+
+void record (sensors **history, sensors *ptr);
+void passage_drive (sensors **history, int speed);
+void playback (sensors **history, int speed);
+void dead_end(sensors **history, int speed);
+
 #endif
 
 

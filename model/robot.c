@@ -70,3 +70,18 @@ void hall_follow() {
 void hall_turning_point() {
   
 }
+
+double ratios(sensors *Sensors) {
+  
+  // int differenceBack = r.s.rangeSR - r.s.rangeSL; int differenceSide = r.s.rangeFR - r.s.rangeFL;
+  // double ratioBack = (double) r.s.rangeSR / r.s.rangeSL;
+  double ratioSide = (double) Sensors->rangeFR / Sensors->rangeFL;
+
+  // dist expectDifferenceBack = { 0 - r.s.rangeSL, 0 - r.s.rangeSR}; dist expectDifferenceSide = {27 - r.s.rangeFL,27 - r.s.rangeFR};
+  // dist expectRatioBack = {27.0 / r.s.rangeSL,27.0 / r.s.rangeSR}; dist expectRatioSide = {27.0 / r.s.rangeFL,27.0 / r.s.rangeFR};
+
+  // printf("PARSE sl%i sr%i fl%i fr%i us%i\n", r.s.rangeSL, r.s.rangeSR, r.s.rangeFL, r.s.rangeFR, r.s.us);
+  return ratioSide;
+  
+}
+

@@ -27,4 +27,5 @@ int gp2d12_ir_to_dist(int ir);
 
 int time_to_ticks (int unit, int voltage);
 double wallAngle (int b, int c, int A);
+double ratios(sensors *Sensors);
 #endif
