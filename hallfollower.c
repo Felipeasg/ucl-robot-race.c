@@ -43,24 +43,23 @@ void record (sensors **history, sensors *ptr) {
 
 }
 
-void passage_drive (double ratio, sensors **history) {
-
-  int speed = 20;
+void passage_drive (sensors **history, int speed) {
   
+  double ratio = ratios();
+
   volts voltage;
   voltage.l = ratio < 1.0 ? (double)speed*ratio : speed;
   voltage.r = ratio > 1.0 ? (double)speed/ratio : speed;
 
-  move(voltage);
-  encodersGet(&r.s);
+  move(&voltage);
 
+  encodersGet(&r.s);
   record(history, &r.s);
   
 }
 
-void play (sensors **history) {
+void playback (sensors **history, int speed) {
 
-  int speed = 20;
   sensors initial;
   dist todo;
   volts voltage;
@@ -78,12 +77,10 @@ void play (sensors **history) {
           todo.l = initial.encodersL - r.s.encodersR > (*history)->encodersL;
           todo.r = initial.encodersR - r.s.encodersL > (*history)->encodersR;
           
-          volts voltage;
-          voltage.l = speed * (todo.r ? 1 : 0);
-          voltage.r = speed * (todo.l ? 1 : 0);
+          voltage = (volts){ speed * (todo.r ? 1 : 0), speed * (todo.l ? 1 : 0) };
 
-          moveAtVoltage(voltage.l, voltage.r);
-          
+          move(&voltage);
+
           encodersGet(&r.s);
           
       } while (todo.r || todo.l);
@@ -92,20 +89,17 @@ void play (sensors **history) {
   }
 }
 
-void hall(sensors **history) { usGet(&r.s); rangeFGet(&r.s); rangeSGet(&r.s); addLog(&r.s, &r.l);
+void dead_end(sensors **history, int speed) { usGet(&r.s); rangeFGet(&r.s); rangeSGet(&r.s); addLog(&r.s, &r.l);
 
   moveILR(-16,16);
   
   while (r.s.us > 15) { usGet(&r.s); rangeFGet(&r.s); rangeSGet(&r.s);
-    
-    double ratio = ratios();
 
-    passage_drive(ratio, history);
+    passage_drive(history, speed);
     
     addLog(&r.s, &r.l);
   }
 
-  play(history);
 }
 
 
@@ -117,7 +111,8 @@ int main () {
 
   sensors *history = NULL;
   
-  hall(&history);
+  dead_end(&history, 20);
+  playback(&history, 20);
   
   return 0;
 }
