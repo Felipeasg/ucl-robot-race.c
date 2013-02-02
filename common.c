@@ -25,6 +25,7 @@ frontsAreInfinite = false,
 frontLisCloser = false,
 frontLRisk = false,
 frontRRisk = false,
+frontRisk = false,
 
 sidesAreEqual = false,
 sideLInfinite = false,
@@ -34,6 +35,10 @@ sideLisCloser = false,
 sideLRisk = false,
 sideRRisk = false,
 
+sideLFar = false,
+sideRFar = false,
+
+backAreEqual = false,
 backLisInfinite = false,
 backRisInfinite = false,
 backsAreInfinite = false,
@@ -89,17 +94,9 @@ volts DEFAULT_VOLTS = {
   .r = 0
 };
 
-request DEFAULT_REQUEST = {
-  .checkFront = true,
-  .checkBack = true,
-  .checkSide = true,
-  .checkEncoders = true,
-  
-  .calculateBack = true,
-  .calculateSide = true,
-  .calculateFront = true,
-  .setWallAuto = true
-};
+request DEFAULT_REQUEST = { .checkFront = false, .checkBack = true, .checkSide = false, .checkSideStatic = true, .checkFrontStatic = true, .checkEncoders = true,
+                .calculateBack = true, .calculateSide = true, .calculateFront = false,
+                .setWallAuto = true, .rotate180 = true };
 
 int sock = -1;
 
@@ -118,7 +115,7 @@ robot r = {
     .us = 0,
     .wall = 0
   },
-  .v = (volts){r: 20, l: 20},
+  .v = (volts){r: 0, l: 0},
   .l = (logs){.index = -1, .empty = true, .wall=0 }
 };
 
@@ -419,11 +416,11 @@ void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) 
     bumpersParse(elaborated, Sensors);
     sensorInvolved++;
   }
-  if (funcNumber == SIFLR || (!strcmp(elaborated[0], "S") && !strcmp(elaborated[1], "SIFLR"))) {
+  if (funcNumber == SIFLR || (!strcmp(elaborated[0], "S") && !strcmp(elaborated[1], "IFLR"))) {
     rangeFParse(elaborated, Sensors);
     sensorInvolved++;
   }
-  if (funcNumber == SISLR || (!strcmp(elaborated[0], "S") && !strcmp(elaborated[1], "SISLR"))) {
+  if (funcNumber == SISLR || (!strcmp(elaborated[0], "S") && !strcmp(elaborated[1], "ISLR"))) {
     rangeSParse(elaborated, Sensors);
     sensorInvolved++;
   }
@@ -533,6 +530,19 @@ volts setVoltage(volts speed, dist scale) {
   else if (nextV.l > nextV.r) { considerRotation(RIGHT); }
   else { considerRotation(0); }
   return nextV;
+}
+
+void reposition(robot* r, int encodersL, int encodersR, int voltageL, int voltageR) {
+  sensors toBe = DEFAULT_SENSORS;
+  sensors initial = DEFAULT_SENSORS;
+  encodersSet(&initial, r->s.encodersL, r->s.encodersR);
+  encodersSet(&toBe, encodersL, encodersR);
+
+  encodersGet(&r->s);
+  while (sensorsToBe(&r->s, &initial, &toBe)) {
+    moveAtVoltage(voltageL, voltageR);
+    encodersGet(&r->s);
+  }
 }
 
 // TODO

@@ -6,4 +6,6 @@ double checkFront(bool accurate);
 dist checkSide(bool accurate, int angleL, int angleR);
 void considerRotation(int direction);
 
+dist checkSideStatic(bool accurate);
+double checkFrontStatic(bool accurate);
 #endif

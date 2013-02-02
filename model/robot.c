@@ -7,6 +7,14 @@
 #include "common.h"
 #include "robot.h"
 
+const int INTERIOR = 1;
+const int EXTERIOR = 2;
+const int ILL = 3;
+const int PORTAL = 4;
+const int SPLITL = 5;
+const int SPLITF = 6;
+const int TERMINATE = 7;
+
 double slideE(int m, int n) {
   m = m/10; printf("%i\n",m);
   n = n/10; printf("%i\n",n);
@@ -38,3 +46,27 @@ int gp2d12_ir_to_dist(int ir) { return (ir >35) ? (6787 / (ir - 3)) - 4 : 200; }
 
 int time_to_ticks (int unit, int voltage) { return unit * voltage* 0.156; }
 double wallAngle (int b, int c, int A) { return asin( (c * sin(A)) / (sqrt( pow(b,2) + pow(c,2) - 2*b*c ) ) ); }
+
+
+void move_to_wall() {
+  // checkSensors();
+  // check if something on the left
+  // check if something on the right
+  // check if there is something in front
+  // if it is further, go straight, otherwise turn right and hold the left
+}
+
+void wall_follow() {
+  // there is a rangemin and a rangemax
+  // there is a range0
+  // robot is distant range0 on the L/R
+  // check opposite sensor in case go to hall follow
+}
+void hall_follow() {
+  // mantains equidistance 
+  // check for SPLIT or PORTAL
+}
+
+void hall_turning_point() {
+  
+}

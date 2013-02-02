@@ -8,15 +8,52 @@
 #include "rangefinders.h"
 #include "us.h"
 #include "robot.h"
+#include "check.h"
+
+
+double checkFrontStatic(bool accurate) {
+
+  usGet(&r.s);
+  frontRisk = (r.s.us < 20) ;
+  return r.s.us;
+}
+
+dist checkSideStatic(bool accurate) {
+  moveILR(-30, 0);
+  rangeFGet(&r.s); // addLog(&r.s, &r.l);
+  
+  // Range trigs
+  double rFRS = rangeFRSide(r.s.rangeFR);
+  double rFLS = rangeFLSide(r.s.rangeFL);
+  double rFRF = rangeFRFront(r.s.rangeFR);
+  double rFLF = rangeFLFront(r.s.rangeFL);
+
+  // Setting bools
+  sidesAreEqual = ((r.s.rangeFL - r.s.rangeFL) <= 5);
+  sideLInfinite = (r.s.rangeFL == 100);
+  sideRInfinite = (r.s.rangeFR == 100 );
+  sidesAreInfinite = (sideLInfinite == true && sideRInfinite == true);
+  sideLisCloser = (r.s.rangeFL < r.s.rangeFR);
+  sideLRisk = (r.s.rangeFL < 15);
+  sideRRisk = (r.s.rangeFR < 15);
+  sideLFar = (r.s.rangeFL > 30);
+  sideRFar = (r.s.rangeFR < 40);
+
+  // Calculate angle
+  setWall();
+  printf( "checkSide %lF %lF %i %i\n", rangeFLSide(r.s.rangeFL), rangeFRSide(r.s.rangeFR), r.s.rangeFL, r.s.rangeFR );
+  return (dist){ r.s.rangeFL, r.s.rangeFR};
+}
 
 dist checkBack(bool accurate) {
   rangeSGet(&r.s);
+  backAreEqual = ((r.s.rangeFL - r.s.rangeFL) <= 5);
   backLisInfinite = (r.s.rangeSL == 38);
   backRisInfinite = (r.s.rangeSR == 38);
   backsAreInfinite = (backLisInfinite && backRisInfinite);
   backLisCloser = (r.s.rangeSL < r.s.rangeSR);
-  backLRisk = (r.s.rangeSL < 10);
-  backRRisk = (r.s.rangeSR < 10);
+  backLRisk = (r.s.rangeSL < 8);
+  backRRisk = (r.s.rangeSR < 8);
   setWall();
   return (dist){r.s.rangeSL,r.s.rangeSR};
 }
@@ -61,6 +98,7 @@ dist checkSide(bool accurate, int angleL, int angleR) {
   // Tracking wanted angle
   moveILR(angleL, angleR);
   rangeFGet(&r.s); // addLog(&r.s, &r.l);
+  printf("\n checkSide %d \n", r.s.rangeFL);
   
   // Range trigs
   double rFRS = rangeFRSide(r.s.rangeFR);
@@ -85,6 +123,7 @@ dist checkSide(bool accurate, int angleL, int angleR) {
 
   // Return distance and set wall if needed
   setWall();
+  printf( "checkSide %lF %lF %i %i\n", rangeFLSide(r.s.rangeFL), rangeFRSide(r.s.rangeFR), r.s.rangeFL, r.s.rangeFR );
   return (dist){ rangeFLSide(r.s.rangeFL), rangeFRSide(r.s.rangeFR)};
 }
 

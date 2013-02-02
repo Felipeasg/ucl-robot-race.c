@@ -39,7 +39,7 @@ int main () {
   volts speed = {30,30};
 
   // This is a new cycle, first check and then move
-  while(1) { cTrail(); memcpy(&initial, &r.s, sizeof(sensors));
+  while(1) { memcpy(&initial, &r.s, sizeof(sensors));
 
     if (req.setWallAuto) {
       if (r.s.wall == LEFT) req.considerSide = LEFT;
@@ -65,10 +65,10 @@ int main () {
       /**/printf("frontLRisk %d frontLRisk %d sideLRisk %d sideRRisk %d backLRisk %d backRRisk %d wall %d\n", frontLRisk, frontLRisk, sideLRisk, sideRRisk, backLRisk, backRRisk, r.s.wall);/**/
       if (!frontLRisk && !frontRRisk && !sideLRisk && !sideRRisk && !backLRisk && !backRRisk) {
 
-        // No risks. No wall. Go straight
+        // Case 1: No risks. No wall. Go straight
         if (r.s.wall == 0) { backVal = (dist) {0,0}; /**/printf("No risks. No wall. Go straight\n"); }/**/
         
-        // No risks. Left wall. Touching back. We are in a deep corner. Turn
+        // Case 2: No risks. Left wall. Touching back. We are in a deep corner. Turn
         else if (r.s.wall == LEFT && sideLInfinite && !backLisInfinite) { /**/printf("No risks. Left wall. Touching back. Turn\n");/**/
 
           backConsidered = toBack.l;
@@ -79,7 +79,7 @@ int main () {
           else if (backConsidered < 20 && backConsidered >= 10) {backVal = (dist) {backDif/1.5,backDif/1.5};} // In range
 
           
-         // No risks. Left wall. Touching back. We are in a deep corner. Turn
+        // Case 3: No risks. Left wall. Touching back. We are in a deep corner. Turn
         } else if (r.s.wall == RIGHT && sideLInfinite && !backLisInfinite) {/**/printf("No Risks. Right Wall is being followed %i.\n", r.s.wall);/**/ 
 
           backConsidered = toBack.r;
@@ -90,10 +90,10 @@ int main () {
           else if (backConsidered < 20 && backConsidered >= 10) {backVal = (dist) {-backDif/1.5,-backDif/1.5};} // In range
 
         }
-        // You are
+        // Default
         else {backVal = (dist){999, 999};}
         
-      // There are risks, skip
+      // Risks, skip
       } else { /**/printf("Risks, skip.\n");/**/ backVal = (dist){999, 999}; }
       
       printf("backVal %lF %lF\n", backVal.l, backVal.r);// TODO check the other side tooooooo!
@@ -106,12 +106,12 @@ int main () {
 
       if (r.s.wall == LEFT) {
         sideConsidered = toSide.l;
-        sideDif = 40 - sideConsidered; /*/printf("sideDif %i\n", sideDif);/**/
+        sideDif = 20 - sideConsidered; /*/printf("sideDif %i\n", sideDif);/**/
 
-        if (sideConsidered < 100 && sideConsidered >= 60)     { sideVal = (dist) {-15,-15};}          // Too far
-        else if (sideConsidered < 60 && sideConsidered >= 55) { sideVal = (dist) {sideDif, sideDif};} // Far
-        else if (sideConsidered < 55 && sideConsidered >= 45) { sideVal = (dist) {0, 0};}             // In range
-        else if (sideConsidered < 45)                         { sideVal = (dist) {sideDif, sideDif};} // Close
+        if (sideConsidered < 100 && sideConsidered >= 60)     {  sideVal = (dist) {sideDif, sideDif};}          // Too far
+        else if (sideConsidered < 60 && sideConsidered >= 25) { sideVal = (dist) {sideDif, sideDif};} // Far
+        else if (sideConsidered < 25 && sideConsidered >= 13) { sideVal = (dist) {0, 0};}             // In range
+        else if (sideConsidered < 13)                         { sideVal = (dist) {sideDif, sideDif};} // Close
 
       } else {
         sideConsidered = toSide.r;

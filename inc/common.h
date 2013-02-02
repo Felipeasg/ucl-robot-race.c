@@ -17,7 +17,7 @@
 
 char buf[80];
 
-typedef struct {
+struct sensors {
   int encodersL;
   int encodersR;
   int bumpersL;
@@ -30,7 +30,10 @@ typedef struct {
   int rangeSR;
   int us;
   int wall;
-} sensors;
+
+  struct sensors *next;
+};
+typedef struct sensors sensors;
 
 typedef struct {
   bool spin;
@@ -60,7 +63,7 @@ typedef struct {
   int index;
   bool empty;
   int wall;
-  } ptrLogs;
+} ptrLogs;
 
 typedef struct {
   sensors s;
@@ -72,12 +75,16 @@ typedef struct {
   bool checkFront;
   bool checkBack;
   bool checkSide;
+  bool checkFrontStatic;
+  bool checkSideStatic;
   bool checkEncoders;
   
   bool calculateSpeed;
   bool calculateBack;
   bool calculateFront;
   bool calculateSide;
+  
+  bool rotate180;
   
   bool setWallAuto;
   bool setWall;
@@ -99,6 +106,7 @@ frontsAreInfinite,
 frontLisCloser,
 frontLRisk,
 frontRRisk,
+frontRisk,
 
 sidesAreEqual,
 sideLInfinite,
@@ -107,7 +115,10 @@ sidesAreInfinite,
 sideLisCloser,
 sideLRisk,
 sideRRisk,
+sideLFar,
+sideRFar,
 
+backAreEqual,
 backLisInfinite,
 backRisInfinite,
 backsAreInfinite,
@@ -152,6 +163,9 @@ void cTrail();
 double min(double one, double two);
 void setWall();
 volts setVoltage(volts speed, dist scale);
+void reposition(robot* r, int encodersL, int encodersR, int voltageL, int voltageR);
+volts shouldReposition();
+
 #endif
 
 
