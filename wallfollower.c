@@ -59,7 +59,7 @@ int main () {
 
     if (req.rotate180 == true) {
       if (frontRisk && sideLRisk && sideRRisk) {
-        reposition(&r, 400, 400, 10, -10); 
+        reposition(&r.s, 400, 400, 10, -10); 
         req = DEFAULT_REQUEST;
         continue;
       }

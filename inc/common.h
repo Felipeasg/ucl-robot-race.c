@@ -163,7 +163,7 @@ void cTrail();
 double min(double one, double two);
 void setWall();
 volts setVoltage(volts speed, dist scale);
-void reposition(robot* r, int encodersL, int encodersR, int voltageL, int voltageR);
+void reposition(sensors* s, int encodersL, int encodersR, int voltageL, int voltageR);
 volts shouldReposition();
 
 

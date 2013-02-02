@@ -532,21 +532,20 @@ volts setVoltage(volts speed, dist scale) {
   return nextV;
 }
 
-void reposition(robot* r, int encodersL, int encodersR, int voltageL, int voltageR) {
+void reposition(sensors* s, int encodersL, int encodersR, int voltageL, int voltageR) {
   sensors toBe = DEFAULT_SENSORS;
   sensors initial = DEFAULT_SENSORS;
-  encodersSet(&initial, r->s.encodersL, r->s.encodersR);
+  encodersSet(&initial, s->encodersL, s->encodersR);
   encodersSet(&toBe, encodersL, encodersR);
 
-  encodersGet(&r->s);
-  while (sensorsToBe(&r->s, &initial, &toBe)) {
+  encodersGet(s);
+  while (sensorsToBe(s, &initial, &toBe)) {
     moveAtVoltage(voltageL, voltageR);
-    encodersGet(&r->s);
+    encodersGet(s);
   }
 }
 
 void record (sensors **history, sensors *ptr) {
-
   sensors *recording = (sensors*)malloc(sizeof(sensors));
 
   *recording = *ptr;
@@ -557,10 +556,9 @@ void record (sensors **history, sensors *ptr) {
 }
 
 void passage_drive (sensors **history, int speed) {
-  
   double ratio = ratios(&r.s);
-
   volts voltage;
+
   voltage.l = ratio < 1.0 ? (double)speed*ratio : speed;
   voltage.r = ratio > 1.0 ? (double)speed/ratio : speed;
 
@@ -572,14 +570,13 @@ void passage_drive (sensors **history, int speed) {
 }
 
 void playback (sensors **history, int speed) {
-
   sensors initial;
   dist todo;
   volts voltage;
 
   encodersGet(&initial);
 
-  reposition(&r, 400, 400, 20, -20);
+  reposition(&r.s, 400, 400, 20, -20);
 
   r.s = DEFAULT_SENSORS;
   encodersReset();
