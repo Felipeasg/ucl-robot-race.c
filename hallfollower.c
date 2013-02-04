@@ -21,7 +21,7 @@
 int main () {
   
   initSocket();
-  
+  sleep(3);
   encodersReset();
 
   sensors *history = NULL;

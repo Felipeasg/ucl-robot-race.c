@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 #include <stdbool.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -248,37 +249,6 @@ void constAcceleration (int initialVL, int initialVR, int finalVL, int finalVR, 
   }
 }
 
-int initSocket() {
-  struct sockaddr_in s_addr;
-
-  if (sock != -1) {
-    printf("Sock is already open\n");
-    close(sock);
-    sock = -1;
-  }
-
-  if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-    fprintf(stderr, "Failed to create socket1\n");
-    exit(1);
-  }
-  
-  while (1) {
-    printf("Sock is in while\n");
-    s_addr.sin_family = AF_INET;
-    s_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    s_addr.sin_port = htons(55443);
-
-    if (connect(sock, (struct sockaddr *) &s_addr, sizeof(s_addr)) >= 0) {
-      /* connection succeeded */
-      printf("Connection succeeded\n");
-      return sock;
-    }
-    sleep(1);
-    printf(".");
-    fflush(stdout);
-  }
-}
-
 void sensorsDifference(sensors* last, sensors* prev, sensors* new) {
   new->encodersL = last->encodersL - prev->encodersL;
   new->encodersR = last->encodersR - prev->encodersR;
@@ -363,7 +333,7 @@ int readCmd(char* buf, int bufsize) {
 
 
 void nextCmd() {
-  writeCmd(buf, strlen(buf)); memset(buf, 0, 80); read(sock, buf, 80); // TODO talk with prof
+  send_msg(buf, strlen(buf)); memset(buf, 0, 80); recv_msg(buf, 80); // TODO talk with prof
 }
 
 bool sensorToBe(int current, int initial, int toBe ) {
@@ -395,7 +365,12 @@ void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) 
 
   elaborated[i] = strtok (buf," ");
   
-  if (!strcmp(elaborated[i], ".\n")) return;
+  if (!strcmp(elaborated[i], ".\n")) {
+    memset(elaborated, 0, 80);
+    memset(buf, 0, 80);
+    read(sock, buf, 80);
+    return parseCmd (buf, elaborated, funcNumber, Sensors);
+  }
   while (elaborated[i++] != NULL) {
     elaborated[i] = strtok (NULL, " ");
   }
@@ -409,6 +384,7 @@ void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) 
   }
 
   if (funcNumber == SMELR || (!strcmp(elaborated[0], "S") && !strcmp(elaborated[1], "MELR"))) {
+    printf("The Buffer %s\n",buf);
     encodersParse(elaborated, Sensors);
     sensorInvolved++;
   }
@@ -535,14 +511,17 @@ volts setVoltage(volts speed, dist scale) {
 void reposition(sensors* s, int encodersL, int encodersR, int voltageL, int voltageR) {
   sensors toBe = DEFAULT_SENSORS;
   sensors initial = DEFAULT_SENSORS;
-  encodersSet(&initial, s->encodersL, s->encodersR);
+  encodersSet(&initial, r.s.encodersL, r.s.encodersR);
   encodersSet(&toBe, encodersL, encodersR);
 
-  encodersGet(s);
-  while (sensorsToBe(s, &initial, &toBe)) {
+  encodersGet(&r.s);
+  printf("In loop %d, %d,%d", r.s.encodersL, initial.encodersL, toBe.encodersL);
+  while (sensorsToBe(&r.s, &initial, &toBe)) {
     moveAtVoltage(voltageL, voltageR);
-    encodersGet(s);
+    encodersGet(&r.s);
+    printf("In loop %d, %d,%d", r.s.encodersL, initial.encodersL, toBe.encodersL);
   }
+  printf("Finished");
 }
 
 void record (sensors **history, sensors *ptr) {
@@ -556,6 +535,9 @@ void record (sensors **history, sensors *ptr) {
 }
 
 void passage_drive (sensors **history, int speed) {
+  printf("We are in passage_drive\n");
+  usGet(&r.s); rangeFGet(&r.s); rangeSGet(&r.s);
+
   double ratio = ratios(&r.s);
   volts voltage;
 
@@ -565,18 +547,34 @@ void passage_drive (sensors **history, int speed) {
   move(&voltage);
 
   encodersGet(&r.s);
+  printf("In loop %d", r.s.encodersL);
   record(history, &r.s);
   
 }
 
 void playback (sensors **history, int speed) {
-  sensors initial;
+  printf("We are in playback\n");
+  sensors initial = DEFAULT_SENSORS;
   dist todo;
   volts voltage;
 
-  encodersGet(&initial);
 
-  reposition(&r.s, 400, 400, 20, -20);
+
+
+  encodersGet(&initial);
+  printf("Initial is %d\n", initial.encodersL);
+
+  sensors toBe = DEFAULT_SENSORS;
+  encodersSet(&toBe, 400, 400);
+
+  encodersGet(&r.s); printf("In loop %d, %d,%d", r.s.encodersL, initial.encodersL, toBe.encodersL);
+  while (sensorsToBe(&r.s, &initial, &toBe)) {
+    moveAtVoltage(20, -20);
+    encodersGet(&r.s);
+    printf("In loop %d, %d,%d\n", r.s.encodersL, initial.encodersL, toBe.encodersL);
+  }
+  printf("Finished\n");
+
 
   r.s = DEFAULT_SENSORS;
   encodersReset();
@@ -584,8 +582,12 @@ void playback (sensors **history, int speed) {
   while (*history)
   {
       do {
+          printf("History loop\n");
           todo.l = initial.encodersL - r.s.encodersR > (*history)->encodersL;
           todo.r = initial.encodersR - r.s.encodersL > (*history)->encodersR;
+          voltage = (volts){ speed * (todo.r ? 1 : 0), speed * (todo.l ? 1 : 0) };
+          printf("History v %d\n", speed);
+          move(&voltage);
           
           /* For now this is a bad way of turning, we want to turn at proper angle */
           /*
@@ -595,31 +597,124 @@ void playback (sensors **history, int speed) {
           record -
           save when change speed
           */
-          voltage = (volts){ speed * (todo.r ? 1 : 0), speed * (todo.l ? 1 : 0) };
-
-          move(&voltage);
 
           encodersGet(&r.s);
-          
       } while (todo.r || todo.l);
       
       *history = (*history)->next;
   }
 }
 
-void dead_end(sensors **history, int speed) { usGet(&r.s); rangeFGet(&r.s); rangeSGet(&r.s); addLog(&r.s, &r.l);
+void dead_end(sensors **history, int speed) { usGet(&r.s); rangeFGet(&r.s); rangeSGet(&r.s); usGet(&r.s); addLog(&r.s, &r.l);
+  printf("We are in dead end\n");
 
   moveILR(-16,16);
+  printf("We are in us %d, %d,%d\n",r.s.us, r.s.rangeFL, r.s.rangeSL);
   
-  while (r.s.us > 15) { usGet(&r.s); rangeFGet(&r.s); rangeSGet(&r.s);
+  while (r.s.us > 15) {
+    printf("We are in us %d\n",r.s.us);
 
     passage_drive(history, speed);
     
     addLog(&r.s, &r.l);
   }
+  printf("We are in us %d\n",r.s.us);
 
+}
+
+int send_msg(char* msg, int len) {
+  if (write(sock, msg, len) <= 0) {
+    /* the write failed - likely the robot was switched off - attempt
+       to reconnect and reinitialize */
+    initSocket();
+    initialize_robot();
+    return 0;
+  } else {
+    return 1;
+  }
+}
+
+int recv_msg(char *buf, int bufsize) {
+  int val;
+  fd_set read_fdset;
+  fd_set except_fdset;
+  struct timeval tv;
+  tv.tv_sec = 2;
+  tv.tv_usec = 0;
+  FD_ZERO(&read_fdset);
+  FD_ZERO(&except_fdset);
+  FD_SET(sock, &read_fdset);
+  FD_SET(sock, &except_fdset);
+  if (select(sock+1, &read_fdset, NULL, &except_fdset, &tv) == 0) {
+    /* we've waited 2 seconds and got no response - too long - conclude
+       the socket is dead */
+    printf("timed out waiting response\n");
+    initSocket();
+    initialize_robot();
+    return 0;
+  }
+  if (FD_ISSET(sock, &except_fdset)) {
+    initSocket();
+    initialize_robot();
+    return 0;
+  }
+  
+  assert(FD_ISSET(sock, &read_fdset));
+  val = read(sock, buf, bufsize);
+  if (val > 0) {
+  } else {
+    /* the write failed - likely the robot was switched off - attempt
+       to reconnect and reinitialize */
+    initSocket();
+    initialize_robot();
+  }
+  return val;
+}
+
+int initSocket() {
+  int volts;
+  printf("connecting...");
+  struct sockaddr_in s_addr;
+  if (sock != -1) {
+    close(sock);
+    sock = -1;
+  }
+
+  if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
+    fprintf(stderr, "Failed to create socket\n");
+    exit(1);
+  }
+
+  while (1) {
+    s_addr.sin_family = AF_INET;
+    s_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    s_addr.sin_port = htons(55443);
+
+    if (connect(sock, (struct sockaddr *) &s_addr, sizeof(s_addr)) >= 0) {
+      /* connection succeeded */
+      printf("done\n");
+      sleep(1);
+      return sock;
+    }
+    sleep(1);
+    printf(".");
+    fflush(stdout);
+  }
+}
+
+
+void initialize_robot() {
 }
 
 // TODO
 // turn very slowly
 // move as fast as he can.
+
+
+
+// TODO
+// decrease # of lists
+// save voltage in the sensors
+// fix playback
+
+// improve hall follower/ wall follower

@@ -32,6 +32,7 @@ struct sensors {
   int wall;
 
   struct sensors *next;
+  // struct sensors *prev;
 };
 typedef struct sensors sensors;
 
@@ -171,6 +172,10 @@ void record (sensors **history, sensors *ptr);
 void passage_drive (sensors **history, int speed);
 void playback (sensors **history, int speed);
 void dead_end(sensors **history, int speed);
+
+int send_msg(char* msg, int len);
+int recv_msg(char *buf, int bufsize);
+void initialize_robot();
 
 #endif
 
