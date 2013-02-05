@@ -17,6 +17,11 @@
 
 char buf[80];
 
+typedef struct {
+  int l;
+  int r;
+} volts;
+
 struct sensors {
   int encodersL;
   int encodersR;
@@ -30,6 +35,7 @@ struct sensors {
   int rangeSR;
   int us;
   int wall;
+  volts v;
 
   struct sensors *next;
   // struct sensors *prev;
@@ -41,11 +47,6 @@ typedef struct {
   bool reposition;
   bool straight;
 } status;
-
-typedef struct {
-  int l;
-  int r;
-} volts;
 
 typedef struct {
   double l;

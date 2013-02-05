@@ -80,7 +80,8 @@ sensors DEFAULT_SENSORS = {
   .rangeSL = 0,
   .rangeSR = 0,
   .us = 0,
-  .wall = 0
+  .wall = 0,
+  .v = (volts) {0,0}
 };
 
 
@@ -535,16 +536,17 @@ void record (sensors **history, sensors *ptr) {
 }
 
 void passage_drive (sensors **history, int speed) {
-  printf("We are in passage_drive\n");
+  // printf("We are in passage_drive\n");
   usGet(&r.s); rangeFGet(&r.s); rangeSGet(&r.s);
 
   double ratio = ratios(&r.s);
-  volts voltage;
+  
 
-  voltage.l = ratio < 1.0 ? (double)speed*ratio : speed;
-  voltage.r = ratio > 1.0 ? (double)speed/ratio : speed;
+  r.s.v.l = ratio < 1.0 ? (double)speed*ratio : speed;
+  r.s.v.r = ratio > 1.0 ? (double)speed/ratio : speed;
+  printf("rsvl %d rsvr %d\n", r.s.v.l,r.s.v.r);
 
-  move(&voltage);
+  move(&r.s.v);
 
   encodersGet(&r.s);
   printf("In loop %d", r.s.encodersL);
@@ -553,27 +555,27 @@ void passage_drive (sensors **history, int speed) {
 }
 
 void playback (sensors **history, int speed) {
-  printf("We are in playback\n");
+  // printf("We are in playback\n");
   sensors initial = DEFAULT_SENSORS;
-  dist todo;
+  volts todo;
   volts voltage;
 
 
 
-
+ /* This should be reposition */
   encodersGet(&initial);
-  printf("Initial is %d\n", initial.encodersL);
+  // printf("Initial is %d\n", initial.encodersL);
 
   sensors toBe = DEFAULT_SENSORS;
   encodersSet(&toBe, 400, 400);
 
-  encodersGet(&r.s); printf("In loop %d, %d,%d", r.s.encodersL, initial.encodersL, toBe.encodersL);
+  encodersGet(&r.s); // printf("In loop %d, %d,%d", r.s.encodersL, initial.encodersL, toBe.encodersL);
   while (sensorsToBe(&r.s, &initial, &toBe)) {
     moveAtVoltage(20, -20);
     encodersGet(&r.s);
-    printf("In loop %d, %d,%d\n", r.s.encodersL, initial.encodersL, toBe.encodersL);
+    // printf("In loop %d, %d,%d\n", r.s.encodersL, initial.encodersL, toBe.encodersL);
   }
-  printf("Finished\n");
+  // printf("Finished\n");
 
 
   r.s = DEFAULT_SENSORS;
@@ -582,11 +584,11 @@ void playback (sensors **history, int speed) {
   while (*history)
   {
       do {
-          printf("History loop\n");
+          // printf("History loop\n");
           todo.l = initial.encodersL - r.s.encodersR > (*history)->encodersL;
           todo.r = initial.encodersR - r.s.encodersL > (*history)->encodersR;
-          voltage = (volts){ speed * (todo.r ? 1 : 0), speed * (todo.l ? 1 : 0) };
-          printf("History v %d\n", speed);
+          voltage = (volts){ (todo.r ? 20 : (*history)->v.r), (todo.l ? 20 : (*history)->v.l) };
+          printf("History v 1%d, 2%d 3%d 4%d 5%d\n", speed, todo.r, (*history)->v.r, todo.l, (*history)->v.l);
           move(&voltage);
           
           /* For now this is a bad way of turning, we want to turn at proper angle */
