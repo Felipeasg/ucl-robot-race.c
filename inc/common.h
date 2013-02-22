@@ -35,6 +35,9 @@ struct sensors {
   int rangeSR;
   int us;
   int wall;
+  int x;
+  int y;
+  int t;
   volts v;
 
   struct sensors *next;

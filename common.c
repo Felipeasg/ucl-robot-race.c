@@ -412,6 +412,7 @@ void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) 
 
 void moveAtVoltage(int voltage1, int voltage2) {
 
+  cTrail();
   stopIf(!inLimit(voltage1) || !inLimit(voltage2));
   sprintf(buf, "M LR %i %i\n", voltage1, voltage2);
   #ifdef DEBUG
@@ -567,7 +568,7 @@ void playback (sensors **history, int speed) {
   // printf("Initial is %d\n", initial.encodersL);
 
   sensors toBe = DEFAULT_SENSORS;
-  encodersSet(&toBe, 400, 400);
+  encodersSet(&toBe, 399, 399);
 
   encodersGet(&r.s); // printf("In loop %d, %d,%d", r.s.encodersL, initial.encodersL, toBe.encodersL);
   while (sensorsToBe(&r.s, &initial, &toBe)) {
@@ -715,8 +716,6 @@ void initialize_robot() {
 
 
 // TODO
-// decrease # of lists
-// save voltage in the sensors
 // fix playback
 
 // improve hall follower/ wall follower
