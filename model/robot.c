@@ -23,11 +23,18 @@ double slideE(int m, int n) {
   return (series2 > series1) ? series2-series1 : series1-series2;
 }
 
-double angle(double sl, double sr) { return (sr > sl) ? (sr-sl)/WHEELDISTANCE : (sl - sr)/WHEELDISTANCE; }
-double sm(double sl, double sr) { return (sl+sr)/2; }
+double angle(double sl, double sr) {
+  double tangent = (sr-sl)/WHEELDISTANCE;
+  return atan(tangent);     
+}
 
-double posX(double sm, double teta) { return sm * cos(teta); }
-double posY(double sm, double teta) { return sm * cos(teta); }
+dist delta (dist current, dist previous) { return (dist){.l = current.l - previous.l, .r = current.r - previous.r}; }
+double deltaAngle(dist delta) { return (delta.r - delta.l) * (M_PI/180); }
+double deltaDistance(dist delta) { return (delta.l+delta.r)/2; }
+
+double posX(double middle, double angle) { return middle * cos(angle); }
+double posY(double middle, double angle) { return middle * sin(angle); }
+
 double relative(double x, double x0) { return x+x0; }
 
 double ticks_to_cm(int ticks) { return T2CM * ticks; }

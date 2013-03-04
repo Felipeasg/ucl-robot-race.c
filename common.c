@@ -81,7 +81,10 @@ sensors DEFAULT_SENSORS = {
   .rangeSR = 0,
   .us = 0,
   .wall = 0,
-  .v = (volts) {0,0}
+  .v = (volts) {0,0},
+  .angle = 0,
+  .x = 0,
+  .y = 0
 };
 
 
@@ -103,7 +106,7 @@ request DEFAULT_REQUEST = { .checkFront = false, .checkBack = true, .checkSide =
 int sock = -1;
 
 robot r = {
-  .s = {
+  .s = (sensors){
     .encodersL = 0,
     .encodersR = 0,
     .bumpersL = 0,
@@ -115,7 +118,10 @@ robot r = {
     .rangeSL = 0,
     .rangeSR = 0,
     .us = 0,
-    .wall = 0
+    .wall = 0,
+    .x = 0,
+    .y = 0,
+    .angle = 0
   },
   .v = (volts){r: 0, l: 0},
   .l = (logs){.index = -1, .empty = true, .wall=0 }
@@ -385,7 +391,7 @@ void parseCmd (char* buf, char* elaborated[], int funcNumber, sensors* Sensors) 
   }
 
   if (funcNumber == SMELR || (!strcmp(elaborated[0], "S") && !strcmp(elaborated[1], "MELR"))) {
-    printf("The Buffer %s\n",buf);
+    // printf("The Buffer %s\n",buf);
     encodersParse(elaborated, Sensors);
     sensorInvolved++;
   }
@@ -421,6 +427,33 @@ void moveAtVoltage(int voltage1, int voltage2) {
   nextCmd();
 }
 
+void position (sensors *current, sensors *initial) {
+  
+  double wheelencoders = cm_to_ticks(WHEELDISTANCE);
+  // Remove previous encoders countings
+  dist pivot, diff = {current->encodersL - initial->encodersL, current->encodersR - initial->encodersR};
+  
+  // Find the angle between the difference in encoders
+  // teta = angle of last movement
+  double teta = (diff.l-diff.r) / wheelencoders;
+  
+  // r.s.angle = cumulative angle
+  r.s.angle = teta + initial->angle;
+
+  // r1 = distance between pivot point and any point in the arc
+  double r1 = (diff.l > diff.r ? diff.l : diff.r) / (double)teta;
+
+  if (teta != 0) {
+    pivot = (dist){r.s.x + (diff.l > diff.r ? 1 : -1) * (r1 - wheelencoders/2) * cos(initial->angle), r.s.y - (r1 - wheelencoders/2) * sin(initial->angle)};
+    r.s.x = cos(teta)*(r.s.x-pivot.l) - sin(teta)*(r.s.y-pivot.r) + pivot.l;
+    r.s.y = sin(teta)*(r.s.x-pivot.l) + cos(teta)*(r.s.y-pivot.r) + pivot.l; 
+  } else {
+    r.s.x += diff.l * cos(initial->angle);
+    r.s.y += diff.r * sin(initial->angle);
+  }
+  printf("Current x: %lF, Current y: %lF, Current angle: %lF\n", r.s.x, r.s.y, initial->angle * 180/M_PI);
+
+}
 void cTrail() {
   sprintf(buf, "C TRAIL\n");
   #ifdef DEBUG
@@ -430,7 +463,12 @@ void cTrail() {
 }
 
 void move(volts* v) {
+  sensors initial = r.s;
+  // printf("Prev x: %lF, Prev y: %lF, Prev angle: %lF\n", r.s.x, r.s.y, r.s.angle);
   moveAtVoltage(v->l, v->r);
+  encodersGet(&r.s);
+  position(&r.s, &initial);
+  // printf("Current x: %lF, Current y: %lF, Current angle: %lF\n", r.s.x, r.s.y, r.s.angle*(180/M_PI));
 }
 
 void stopMovement() {
@@ -517,20 +555,22 @@ void reposition(sensors* s, int encodersL, int encodersR, int voltageL, int volt
   encodersSet(&toBe, encodersL, encodersR);
 
   encodersGet(&r.s);
-  printf("In loop %d, %d,%d", r.s.encodersL, initial.encodersL, toBe.encodersL);
+  // printf("In loop %d, %d,%d", r.s.encodersL, initial.encodersL, toBe.encodersL);
   while (sensorsToBe(&r.s, &initial, &toBe)) {
     moveAtVoltage(voltageL, voltageR);
     encodersGet(&r.s);
-    printf("In loop %d, %d,%d", r.s.encodersL, initial.encodersL, toBe.encodersL);
+    // printf("In loop %d, %d,%d", r.s.encodersL, initial.encodersL, toBe.encodersL);
   }
-  printf("Finished");
+  // printf("Finished");
 }
 
 void record (sensors **history, sensors *ptr) {
+  // Allocate a space in the heap (memory)
   sensors *recording = (sensors*)malloc(sizeof(sensors));
 
   *recording = *ptr;
   recording->next = *history;
+  // history->prev = *recording;
 
   *history = recording;
 
@@ -545,12 +585,11 @@ void passage_drive (sensors **history, int speed) {
 
   r.s.v.l = ratio < 1.0 ? (double)speed*ratio : speed;
   r.s.v.r = ratio > 1.0 ? (double)speed/ratio : speed;
-  printf("rsvl %d rsvr %d\n", r.s.v.l,r.s.v.r);
+  // printf("rsvl %d rsvr %d\n", r.s.v.l,r.s.v.r);
 
   move(&r.s.v);
 
-  encodersGet(&r.s);
-  printf("In loop %d", r.s.encodersL);
+  // printf("In loop %d", r.s.encodersL);
   record(history, &r.s);
   
 }
@@ -563,48 +602,35 @@ void playback (sensors **history, int speed) {
 
 
 
- /* This should be reposition */
-  encodersGet(&initial);
-  // printf("Initial is %d\n", initial.encodersL);
+     /* This should be reposition */
+      encodersGet(&initial);
+      // printf("Initial is %d\n", initial.encodersL);
 
-  sensors toBe = DEFAULT_SENSORS;
-  encodersSet(&toBe, 399, 399);
+      sensors toBe = DEFAULT_SENSORS;
+      encodersSet(&toBe, 401, 401);
 
-  encodersGet(&r.s); // printf("In loop %d, %d,%d", r.s.encodersL, initial.encodersL, toBe.encodersL);
-  while (sensorsToBe(&r.s, &initial, &toBe)) {
-    moveAtVoltage(20, -20);
-    encodersGet(&r.s);
-    // printf("In loop %d, %d,%d\n", r.s.encodersL, initial.encodersL, toBe.encodersL);
-  }
-  // printf("Finished\n");
+      encodersGet(&r.s); // printf("In loop %d, %d,%d", r.s.encodersL, initial.encodersL, toBe.encodersL);
+      while (sensorsToBe(&r.s, &initial, &toBe)) {
+        moveAtVoltage(20, -20);
+        encodersGet(&r.s);
+        // printf("In loop %d, %d,%d\n", r.s.encodersL, initial.encodersL, toBe.encodersL);
+      }
+      // printf("Finished\n");
 
 
   r.s = DEFAULT_SENSORS;
   encodersReset();
 
-  while (*history)
-  {
-      do {
-          // printf("History loop\n");
-          todo.l = initial.encodersL - r.s.encodersR > (*history)->encodersL;
-          todo.r = initial.encodersR - r.s.encodersL > (*history)->encodersR;
-          voltage = (volts){ (todo.r ? 20 : (*history)->v.r), (todo.l ? 20 : (*history)->v.l) };
-          printf("History v 1%d, 2%d 3%d 4%d 5%d\n", speed, todo.r, (*history)->v.r, todo.l, (*history)->v.l);
-          move(&voltage);
-          
-          /* For now this is a bad way of turning, we want to turn at proper angle */
-          /*
-          playback -
-          while (encoders with same speed) {apply}
-          
-          record -
-          save when change speed
-          */
-
-          encodersGet(&r.s);
-      } while (todo.r || todo.l);
-      
-      *history = (*history)->next;
+  while (*history){
+    do {
+        // printf("History loop\n");
+        todo.l = initial.encodersL - r.s.encodersR > (*history)->encodersL;
+        todo.r = initial.encodersR - r.s.encodersL > (*history)->encodersR;
+        voltage = (volts){ (todo.r ? 20 : (*history)->v.r), (todo.l ? 20 : (*history)->v.l) };
+        move(&voltage);
+    } while (todo.r || todo.l);
+    
+    *history = (*history)->next;
   }
 }
 
@@ -612,16 +638,14 @@ void dead_end(sensors **history, int speed) { usGet(&r.s); rangeFGet(&r.s); rang
   printf("We are in dead end\n");
 
   moveILR(-16,16);
-  printf("We are in us %d, %d,%d\n",r.s.us, r.s.rangeFL, r.s.rangeSL);
   
   while (r.s.us > 15) {
-    printf("We are in us %d\n",r.s.us);
 
     passage_drive(history, speed);
     
     addLog(&r.s, &r.l);
   }
-  printf("We are in us %d\n",r.s.us);
+  printf("We arrived at the dead end\n");
 
 }
 

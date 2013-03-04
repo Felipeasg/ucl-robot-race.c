@@ -26,8 +26,14 @@ int main () {
 
   sensors *history = NULL;
   
-  dead_end(&history, 20);
-  playback(&history, 20);
+//  dead_end(&history, 20);
+//  playback(&history, 20);
+
+  while(1) {
+    sensors initial = r.s;
+    encodersGet(&r.s);
+    position(&r.s, &initial);
+  }
   
   return 0;
 }

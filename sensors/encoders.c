@@ -20,7 +20,7 @@ void encodersCmd() {
 void encodersGet(sensors* Sensors) {
   char* elaborated[80];
   encodersCmd();
-  printf("the buffer %s\n", buf);
+  // printf("the buffer %s\n", buf);
   parseCmd(buf, elaborated, SMELR, Sensors);
 }
 

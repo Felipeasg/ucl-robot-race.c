@@ -35,13 +35,14 @@ struct sensors {
   int rangeSR;
   int us;
   int wall;
-  int x;
-  int y;
-  int t;
+  double x;
+  double y;
+  double angle;
   volts v;
 
+  // This is used to point to next sensor reading
   struct sensors *next;
-  // struct sensors *prev;
+  struct sensors *prev;
 };
 typedef struct sensors sensors;
 
@@ -180,6 +181,7 @@ void dead_end(sensors **history, int speed);
 int send_msg(char* msg, int len);
 int recv_msg(char *buf, int bufsize);
 void initialize_robot();
+void position (sensors *current, sensors *initial);
 
 #endif
 
