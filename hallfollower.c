@@ -20,20 +20,16 @@
 
 int main () {
   
+  // Setting up the robot
   initSocket();
   sleep(3);
   encodersReset();
 
+  // Creating a history
   sensors *history = NULL;
   
-//  dead_end(&history, 20);
-//  playback(&history, 20);
-
-  while(1) {
-    sensors initial = r.s;
-    encodersGet(&r.s);
-    position(&r.s, &initial);
-  }
+  dead_end(&history, 20);
+  playback(&history, 20);
   
   return 0;
 }

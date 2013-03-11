@@ -82,7 +82,7 @@ sensors DEFAULT_SENSORS = {
   .us = 0,
   .wall = 0,
   .v = (volts) {0,0},
-  .angle = 0,
+  .angle = M_PI/2,
   .x = 0,
   .y = 0
 };
@@ -121,7 +121,9 @@ robot r = {
     .wall = 0,
     .x = 0,
     .y = 0,
-    .angle = 0
+    .angle = M_PI/2,
+    .prev = NULL,
+    .next = NULL
   },
   .v = (volts){r: 0, l: 0},
   .l = (logs){.index = -1, .empty = true, .wall=0 }
@@ -429,25 +431,39 @@ void moveAtVoltage(int voltage1, int voltage2) {
 
 void position (sensors *current, sensors *initial) {
   
+  // TODO problem:
+  // angle should be at 0 instead of +90
+  
   double wheelencoders = cm_to_ticks(WHEELDISTANCE);
   // Remove previous encoders countings
-  dist pivot, diff = {current->encodersL - initial->encodersL, current->encodersR - initial->encodersR};
+  dist pivot;
+  dist diff = {current->encodersL - initial->encodersL, current->encodersR - initial->encodersR};
+  //dist diff = {1,0};
   
   // Find the angle between the difference in encoders
   // teta = angle of last movement
-  double teta = (diff.l-diff.r) / wheelencoders;
+  double teta = ((diff.r-diff.l) / wheelencoders);
   
   // r.s.angle = cumulative angle
   r.s.angle = teta + initial->angle;
 
   // r1 = distance between pivot point and any point in the arc
-  double r1 = (diff.l > diff.r ? diff.l : diff.r) / (double)teta;
+  double r1 = absDouble( (diff.l > diff.r ? diff.l : diff.r) / (double)teta );
+
+
+  //if (initial->angle > M_PI/2) exit(0);
 
   if (teta != 0) {
-    pivot = (dist){r.s.x + (diff.l > diff.r ? 1 : -1) * (r1 - wheelencoders/2) * cos(initial->angle), r.s.y - (r1 - wheelencoders/2) * sin(initial->angle)};
+    pivot = (dist) {
+      r.s.x + (r1 - wheelencoders/2) * cos(initial->angle),
+      r.s.y - (r1 - wheelencoders/2) * sin(initial->angle)
+    };
+
+    printf("Pivot x: %lF, y:%lF\n", pivot.l, pivot.r);
     r.s.x = cos(teta)*(r.s.x-pivot.l) - sin(teta)*(r.s.y-pivot.r) + pivot.l;
-    r.s.y = sin(teta)*(r.s.x-pivot.l) + cos(teta)*(r.s.y-pivot.r) + pivot.l; 
+    r.s.y = sin(teta)*(r.s.x-pivot.l) + cos(teta)*(r.s.y-pivot.r) + pivot.r; 
   } else {
+    printf("Diff x: %lF, y:%lF\n", diff.l, diff.r);
     r.s.x += diff.l * cos(initial->angle);
     r.s.y += diff.r * sin(initial->angle);
   }
@@ -564,16 +580,20 @@ void reposition(sensors* s, int encodersL, int encodersR, int voltageL, int volt
   // printf("Finished");
 }
 
-void record (sensors **history, sensors *ptr) {
+sensors* record (sensors **history, sensors *ptr) {
   // Allocate a space in the heap (memory)
   sensors *recording = (sensors*)malloc(sizeof(sensors));
 
   *recording = *ptr;
   recording->next = *history;
-  // history->prev = *recording;
+  recording->prev = NULL;
+
+  // If history is NULL, prev and next will be NULL
+  if (*history != NULL) (*history)->prev = recording;
 
   *history = recording;
 
+  return recording;
 }
 
 void passage_drive (sensors **history, int speed) {
@@ -592,6 +612,29 @@ void passage_drive (sensors **history, int speed) {
   // printf("In loop %d", r.s.encodersL);
   record(history, &r.s);
   
+}
+
+void replay (sensors **history, int speed) {
+  // printf("We are in playback\n");
+  sensors initial = DEFAULT_SENSORS;
+  volts todo;
+  volts voltage;
+  // encodersGet(&initial);
+
+  r.s = DEFAULT_SENSORS;
+  encodersReset();
+
+  while (*history) {
+    do {
+        printf("r.s.encodersL %d, history->L %d\n", r.s.encodersL, (*history)->encodersL );
+        todo.l = r.s.encodersL < (*history)->encodersL;
+        todo.r = r.s.encodersR < (*history)->encodersR;
+        voltage = (volts){ (todo.l ? 20 : (*history)->v.l), (todo.r ? 20 : (*history)->v.r) };
+        move(&voltage);
+    } while (todo.r || todo.l);
+    
+    *history = (*history)->prev;
+  }
 }
 
 void playback (sensors **history, int speed) {

@@ -10,5 +10,11 @@ wallfollower: wallfollower.c sensors/*.c model/*.c ai/*.c common.c
 hallfollower: hallfollower.c sensors/*.c model/*.c ai/*.c common.c
 	@gcc -g -o go common.c hallfollower.c sensors/*.c model/*.c ai/*.c -lm -I ./inc/
 
+circle: circle.c sensors/*.c model/*.c ai/*.c common.c
+	@gcc -g -o go common.c circle.c sensors/*.c model/*.c ai/*.c -lm -I ./inc/
+
+test: test.c sensors/*.c model/*.c ai/*.c common.c
+	@gcc -g -o go common.c test.c sensors/*.c model/*.c ai/*.c -lm -I ./inc/
+
 
 .PHONY: hellomake

@@ -173,7 +173,7 @@ void reposition(sensors* s, int encodersL, int encodersR, int voltageL, int volt
 volts shouldReposition();
 
 
-void record (sensors **history, sensors *ptr);
+sensors* record (sensors **history, sensors *ptr);
 void passage_drive (sensors **history, int speed);
 void playback (sensors **history, int speed);
 void dead_end(sensors **history, int speed);
@@ -182,6 +182,7 @@ int send_msg(char* msg, int len);
 int recv_msg(char *buf, int bufsize);
 void initialize_robot();
 void position (sensors *current, sensors *initial);
+void replay (sensors **history, int speed);
 
 #endif
 
