@@ -37,8 +37,8 @@ double posY(double middle, double angle) { return middle * sin(angle); }
 
 double relative(double x, double x0) { return x+x0; }
 
-double ticks_to_cm(int ticks) { return T2CM * ticks; }
-double cm_to_ticks(double cm) { return cm / T2CM; }
+double ticks_to_cm(int ticks) { return (double)T2CM * ticks; }
+double cm_to_ticks(double cm) { return (double)cm / T2CM; }
 
 double range_side(double angle, double distance) { return cos(angle)*distance;};
 double range_front(double angle, double distance) { return sin(angle)*distance;};

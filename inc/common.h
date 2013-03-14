@@ -184,6 +184,12 @@ void initialize_robot();
 void position (sensors *current, sensors *initial);
 void replay (sensors **history, int speed);
 
+double findR1 (dist diff, double teta);
+dist findProjection(dist diff, double initialAngle, double initialX, double initialY);
+dist findReflection(dist point, dist pivot, double teta);
+double findTeta(dist diff);
+dist findPivot (double r1, double initialAngle, double currentAngle, double initialX, double initialY);
+
 #endif
 
 

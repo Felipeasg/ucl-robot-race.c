@@ -429,46 +429,81 @@ void moveAtVoltage(int voltage1, int voltage2) {
   nextCmd();
 }
 
+double findTeta(dist diff) {
+  return ((diff.r-diff.l) / cm_to_ticks(WHEELDISTANCE));
+}
+
+dist findPivot (double r1, double initialAngle, double currentAngle, double initialX, double initialY) {
+  double d = r1 - cm_to_ticks(WHEELDISTANCE)/2;
+  double angle = initialAngle - M_PI/2;
+  dist pivot = {
+    (currentAngle > 0 ? -1 : 1) * (initialX + d * cos(angle)),
+    (currentAngle > 0 ? -1 : 1) * (initialY + d * sin(angle))
+  };
+
+  printf("\tpivot.x %lF, pivot.y %lF, angle %lF, initialAngle %lF\n", pivot.l, pivot.r, angle, initialAngle);
+  return pivot;
+}
+
+dist findReflection(dist point, dist pivot, double teta) {
+  return (dist) {
+    cos(teta)*(point.l-pivot.l) - sin(teta)*(point.r-pivot.r) + pivot.l,
+    sin(teta)*(point.l-pivot.l) + cos(teta)*(point.r-pivot.r) + pivot.r
+  };
+}
+
+dist findProjection(dist diff, double initialAngle, double initialX, double initialY) {
+  return (dist) {
+    initialX + diff.l * cos(initialAngle),
+    initialY + diff.r * sin(initialAngle)
+  };
+}
+
+double findR1 (dist diff, double teta) {
+  return absDouble( (diff.l > diff.r ? diff.l : diff.r) / (double)teta );
+}
+
+void deadreckoning (sensors* current, sensors *initial) {
+  double radius_wheel = cm_to_ticks(10);
+  double wheel_distance = cm_to_ticks(22.5);
+  double revolution_ticks = 360;
+  dist diff = {current->encodersL - initial->encodersL, current->encodersR - initial->encodersR};
+  double teta = (diff.r - diff.l)/wheel_distance;
+  
+  double delta_x = radius_wheel * cos(teta) * (diff.l+diff.r) * (M_PI/360);
+  double delta_y = radius_wheel * cos(teta) * (diff.l+diff.r) * (M_PI/360);
+  
+  r.s.x = initial->x + delta_x;
+  r.s.y = initial->y + delta_y;
+  r.s.angle = initial->angle + teta;
+
+  if (teta != 0) {printf("\tx: %lF, y: %lF, angle: %lF, teta: %lF\n", r.s.x, r.s.y, r.s.angle * 180/M_PI, teta * 180/M_PI);}
+}
+
 void position (sensors *current, sensors *initial) {
   
-  // TODO problem:
-  // angle should be at 0 instead of +90
-  
   double wheelencoders = cm_to_ticks(WHEELDISTANCE);
-  // Remove previous encoders countings
-  dist pivot;
-  dist diff = {current->encodersL - initial->encodersL, current->encodersR - initial->encodersR};
-  //dist diff = {1,0};
+  dist pivot, diff = {current->encodersL - initial->encodersL, current->encodersR - initial->encodersR};
   
-  // Find the angle between the difference in encoders
-  // teta = angle of last movement
-  double teta = ((diff.r-diff.l) / wheelencoders);
-  
-  // r.s.angle = cumulative angle
+  double teta = findTeta(diff); // teta = angle of last movement
+
+  if (teta != 0) { printf("\tcurrent.l %d, initial.l %d, current.r %d, initial.r %d\n", current->encodersL, initial->encodersL, current->encodersR, initial->encodersR);printf("\tdiff.l %lF, diff.r %lF\n", diff.l, diff.r); }
+
   r.s.angle = teta + initial->angle;
-
-  // r1 = distance between pivot point and any point in the arc
-  double r1 = absDouble( (diff.l > diff.r ? diff.l : diff.r) / (double)teta );
-
-
-  //if (initial->angle > M_PI/2) exit(0);
+  double r1 = findR1(diff, teta);   // r1 = distance between pivot point and any point in the arc
 
   if (teta != 0) {
-    pivot = (dist) {
-      r.s.x + (r1 - wheelencoders/2) * cos(initial->angle),
-      r.s.y - (r1 - wheelencoders/2) * sin(initial->angle)
-    };
-
-    printf("Pivot x: %lF, y:%lF\n", pivot.l, pivot.r);
-    r.s.x = cos(teta)*(r.s.x-pivot.l) - sin(teta)*(r.s.y-pivot.r) + pivot.l;
-    r.s.y = sin(teta)*(r.s.x-pivot.l) + cos(teta)*(r.s.y-pivot.r) + pivot.r; 
+    dist pivot = findPivot(r1, initial->angle, teta, r.s.x, r.s.y);
+    dist reflection = findReflection((dist){r.s.x,r.s.y}, pivot, teta);
+    r.s.x = reflection.l;
+    r.s.y = reflection.r;
   } else {
-    printf("Diff x: %lF, y:%lF\n", diff.l, diff.r);
-    r.s.x += diff.l * cos(initial->angle);
-    r.s.y += diff.r * sin(initial->angle);
+    dist projection = findProjection(diff, initial->angle, r.s.x, r.s.y);
+    r.s.x = projection.l;
+    r.s.y = projection.r;
   }
-  printf("Current x: %lF, Current y: %lF, Current angle: %lF\n", r.s.x, r.s.y, initial->angle * 180/M_PI);
 
+  if (r.s.angle != initial->angle) printf("\tx: %lF, y: %lF, angle: %lF, teta: %lF\n", r.s.x, r.s.y, r.s.angle * 180/M_PI, teta * 180/M_PI);
 }
 void cTrail() {
   sprintf(buf, "C TRAIL\n");
@@ -479,11 +514,12 @@ void cTrail() {
 }
 
 void move(volts* v) {
-  sensors initial = r.s;
+  sensors initial;
+  memcpy(&initial, &r.s, sizeof(sensors));
   // printf("Prev x: %lF, Prev y: %lF, Prev angle: %lF\n", r.s.x, r.s.y, r.s.angle);
   moveAtVoltage(v->l, v->r);
   encodersGet(&r.s);
-  position(&r.s, &initial);
+  deadreckoning(&r.s, &initial);
   // printf("Current x: %lF, Current y: %lF, Current angle: %lF\n", r.s.x, r.s.y, r.s.angle*(180/M_PI));
 }
 
